@@ -1,0 +1,35 @@
+.visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG {
+  
+  
+  
+  
+}
+.visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .clearCatcher {
+  fill-opacity: 0;
+}
+.visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .legend .navArrow {
+  fill: #333333;
+  cursor: pointer;
+  
+  stroke: #FFF;
+  stroke-width: 2px;
+}
+.visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .data-labels {
+  font-size: 12px;
+  text-anchor: middle;
+  font-family: helvetica, arial, sans-serif;
+  pointer-events: none;
+}
+.visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .hexagon {
+  fill: none;
+  stroke: #DDDDDD;
+  stroke-width: .5px;
+}
+.visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .axis path,
+.visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .axis line {
+  fill: none;
+  stroke: #BBBBBB;
+}
+.visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .axis text {
+  font-family: "segoe ui", sans-serif;
+}
