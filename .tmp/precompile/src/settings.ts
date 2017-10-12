@@ -37,6 +37,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
       public showHexbins: boolean = true;
       public showHexbinLabels: boolean = true;
       public binColor: string = "#01B8AA";
+      public binOutline: string = "#FFFFFF";
       public showDots: boolean = true;
       public dotColor: string = "#374649";
       

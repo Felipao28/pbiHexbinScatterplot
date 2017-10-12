@@ -14277,6 +14277,7 @@ var powerbi;
                         this.showHexbins = true;
                         this.showHexbinLabels = true;
                         this.binColor = "#01B8AA";
+                        this.binOutline = "#FFFFFF";
                         this.showDots = true;
                         this.dotColor = "#374649";
                         //public fillRule: string = "";
@@ -14355,13 +14356,13 @@ var powerbi;
                     var xIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "xAxis");
                     var yIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "yAxis");
                     var measureIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "measure");
-                    console.log(categoryIndex, xIndex, yIndex, measureIndex);
+                    //console.log(categoryIndex, xIndex, yIndex, measureIndex);
                     var metadata = dataViews[0].metadata;
                     var categoryColumnName = metadata.columns.filter(function (c) { return c.roles["category"]; })[0].displayName;
                     var xColumnName = xIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["xAxis"]; })[0].displayName;
                     var yColumnName = yIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["yAxis"]; })[0].displayName;
                     var valueColumnName = measureIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["measure"]; })[0].displayName;
-                    console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
+                    //console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
                     var sDataPoints = [];
                     for (var i = 0, len = category.values.length; i < len; i++) {
                         var cat = categorical.categories[0].values[i];
@@ -14374,7 +14375,7 @@ var powerbi;
                         //validate measure
                         var measureCheck = 1;
                         measureIndex == -1 ? measureCheck = null : measureCheck = parseFloat(categorical.values[measureIndex].values[i].toString());
-                        console.log(categorical.categories[categoryIndex]);
+                        //console.log(categorical.categories[categoryIndex]);
                         sDataPoints.push({
                             category: cat,
                             xValue: xCheck,
@@ -14405,16 +14406,17 @@ var powerbi;
                 }
                 var Visual = (function () {
                     function Visual(options) {
-                        console.log('Visual constructor', options);
+                        //console.log('Visual constructor', options);
                         this.target = options.element;
                         this.host = options.host;
                         this.selectionManager = options.host.createSelectionManager();
                         var svg = this.svg = d3.select(this.target).append("svg")
                             .attr("class", "container");
+                        var g = this.g = svg.append("g");
                     }
                     Visual.prototype.update = function (options) {
                         this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
-                        console.log('Visual update', options);
+                        //console.log('Visual update', options);
                         if (options.viewport.width < 160) {
                             this.hideAll();
                         }
@@ -14424,6 +14426,7 @@ var powerbi;
                         var selectionManager = this.selectionManager;
                         var host = this.host;
                         var optionBinColor = this.settings.dataPoint.binColor;
+                        var optionBinOutline = this.settings.dataPoint.binOutline;
                         var optionShowBins = this.settings.dataPoint.showHexbins;
                         var optionShowBinLabels = this.settings.dataPoint.showHexbinLabels;
                         var optionDotColor = this.settings.dataPoint.dotColor;
@@ -14431,7 +14434,7 @@ var powerbi;
                         var optionShowXAxis = this.settings.axes.showXAxis;
                         var optionShowYAxis = this.settings.axes.showYAxis;
                         var viewModel = visualTransform(options, this.host);
-                        console.log('ViewModel', viewModel);
+                        //console.log('ViewModel', viewModel);
                         var margin = { left: 100, right: 10, top: 10, bottom: 50 };
                         var height = options.viewport.height - margin.top - margin.bottom;
                         var width = options.viewport.width - margin.left - margin.right;
@@ -14441,7 +14444,7 @@ var powerbi;
                         var measureRange = d3.extent(data, function (d) { return d.measureValue; });
                         //console.log("xRange: ", xRange);
                         //console.log("yRange: ", yRange);
-                        console.log("measureRange: ", measureRange);
+                        //console.log("measureRange: ", measureRange);
                         var xScale = d3.scale.linear()
                             .domain([0, xRange[1]])
                             .range([margin.left, width + margin.left - margin.right]);
@@ -14457,43 +14460,55 @@ var powerbi;
                         //console.log(points);
                         var hexbin = d3.hexbin()
                             .size([width, height])
-                            .radius(30);
+                            .radius(30)
+                            .extent([[0, 0], [width, height]]);
+                        ;
                         //console.log(hexbin(points));
                         var svg = this.svg;
                         svg.selectAll(".axis").remove();
                         svg
                             .attr("width", options.viewport.width)
                             .attr("height", options.viewport.height);
+                        svg.select("#clip").remove();
                         svg.select(".hexagons").remove();
                         svg.select(".hexbinLabels").remove();
                         svg.select(".dots").remove();
-                        var hexagonGroup = svg.append("g")
-                            .attr("class", "hexagons");
-                        var hexagonLabels = svg.append("g")
+                        var g = this.g;
+                        var clip = g.append("clipPath")
+                            .attr("id", "clip")
+                            .append("rect")
+                            .attr("class", "clip-rect")
+                            .attr("width", width)
+                            .attr("height", height)
+                            .attr("transform", "translate(" + margin.left + ",0)");
+                        var hexagonGroup = g.append("g")
+                            .attr("class", "hexagons")
+                            .attr("clip-path", "url(#clip)");
+                        var hexagonLabels = g.append("g")
                             .attr("class", "hexbinLabels");
                         //Axes - over hexagons but under dots
                         if (optionShowXAxis) {
-                            svg.append("g")
+                            g.append("g")
                                 .attr("class", "axis")
-                                .attr("transform", "translate(0, " + (height - margin.top) + ")")
+                                .attr("transform", "translate(0, " + height + ")")
                                 .call(xAxis);
                         }
                         if (optionShowYAxis) {
-                            svg.append("g")
+                            g.append("g")
                                 .attr("class", "axis")
                                 .attr("transform", "translate(" + margin.left + ", 0)")
                                 .call(yAxis);
                         }
-                        var dotGroup = svg.append("g")
+                        var dotGroup = g.append("g")
                             .attr("class", "dots");
                         //Hexagons
                         if (optionShowBins) {
                             var hexagonData = hexbin(data.map(function (d) { return [xScale(d.xValue), yScale(d.yValue)]; }));
                             var hexagons = hexagonGroup.selectAll(".hexagon")
                                 .data(hexagonData);
-                            console.log("hexagonData: ", hexagonData);
+                            //console.log("hexagonData: ", hexagonData);
                             var maxDotsInBin = d3.max(hexagonData.map(function (d) { return d.length; }));
-                            console.log("maxDotsInBin", maxDotsInBin);
+                            //console.log("maxDotsInBin", maxDotsInBin);
                             var colorNoMeasureScale_1 = d3.scale.linear()
                                 .domain([0, maxDotsInBin])
                                 .range(["#DDDDDD", optionBinColor])
@@ -14502,12 +14517,51 @@ var powerbi;
                                 .attr("class", "hexagon")
                                 .attr("d", hexbin.hexagon())
                                 .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
-                                .style("fill", function (d) { return colorNoMeasureScale_1(d.length); });
+                                .style("fill", function (d) { return colorNoMeasureScale_1(d.length); })
+                                .style("stroke", optionBinOutline);
                             hexagons.transition()
                                 .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
                                 .style("fill", function (d) { return colorNoMeasureScale_1(d.length); })
+                                .style("stroke", optionBinOutline)
                                 .duration(1000);
                             hexagons.exit().remove();
+                            if (optionShowBinLabels) {
+                                hexagons.on('mouseover', function (d) {
+                                    var mouse = d3.mouse(svg.node());
+                                    var x = mouse[0];
+                                    var y = mouse[1];
+                                    host.tooltipService.show({
+                                        dataItems: [
+                                            { displayName: "Density", value: d.length.toString(), header: "Bin Stats" }
+                                        ],
+                                        identities: [],
+                                        coordinates: [x, y],
+                                        isTouchEvent: false
+                                    });
+                                });
+                                hexagons.on('mouseout', function (d) {
+                                    d3.select(this).attr({
+                                        'r': 4,
+                                    });
+                                    host.tooltipService.hide({
+                                        immediately: true,
+                                        isTouchEvent: false
+                                    });
+                                });
+                                hexagons.on("mousemove", function (d) {
+                                    var mouse = d3.mouse(svg.node());
+                                    var x = mouse[0];
+                                    var y = mouse[1];
+                                    host.tooltipService.move({
+                                        dataItems: [
+                                            { displayName: "Density", value: d.length.toString(), header: "Bin Stats" }
+                                        ],
+                                        identities: [],
+                                        coordinates: [x, y],
+                                        isTouchEvent: false
+                                    });
+                                });
+                            }
                         }
                         //Dots
                         if (optionShowDots) {
@@ -14528,7 +14582,7 @@ var powerbi;
                                     return "translate(" + margin.left + ",0)";
                                 }
                                 else if (d.yValue == null) {
-                                    return "translate(0," + (height - margin.top) + ")";
+                                    return "translate(0," + height + ")";
                                 }
                                 else {
                                     return "translate(0,0)";
@@ -14591,22 +14645,6 @@ var powerbi;
                                     isTouchEvent: false
                                 });
                             });
-                        }
-                        //Hexagon labels
-                        if (optionShowBinLabels) {
-                            var hexbinLabels = hexagonLabels.selectAll(".hexbinLabels")
-                                .data(hexbin(data.map(function (d) { return [xScale(d.xValue), yScale(d.yValue)]; })));
-                            hexbinLabels.enter().append("text")
-                                .attr("class", "hexbinLabels")
-                                .attr("x", function (d) { return d.x - 4 * d.length.toString().length; })
-                                .attr("y", function (d) { return d.y; })
-                                .text(function (d) { return d.length; });
-                            hexbinLabels.transition()
-                                .attr("x", function (d) { return d.x - 4 * d.length.toString().length; })
-                                .attr("y", function (d) { return d.y; })
-                                .text(function (d) { return d.length; })
-                                .duration(2000);
-                            hexbinLabels.exit().remove();
                         }
                     };
                     Visual.prototype.hideAll = function () {

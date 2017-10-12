@@ -117,9 +117,7 @@
   pointer-events: none;
 }
 .visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .hexagon {
-  fill: none;
-  stroke: #DDDDDD;
-  stroke-width: .5px;
+  stroke-width: 2px;
 }
 .visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .axis path,
 .visual-hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG .axis line {

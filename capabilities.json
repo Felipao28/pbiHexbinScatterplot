@@ -42,9 +42,19 @@
                     }
                 },
                 "showHexbinLabels": {
-                    "displayName": "Show bin labels",
+                    "displayName": "Show bin stats on hover",
                     "type": {
                         "bool": true
+                    }
+                },
+                "binOutline": {
+                    "displayName": "Bin outline",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
                     }
                 },
                 "dotColor": {

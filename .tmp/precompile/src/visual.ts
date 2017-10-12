@@ -76,7 +76,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
         let yIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "yAxis");
         let measureIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "measure");
 
-        console.log(categoryIndex, xIndex, yIndex, measureIndex);
+        //console.log(categoryIndex, xIndex, yIndex, measureIndex);
 
         let metadata = dataViews[0].metadata;
         let categoryColumnName = metadata.columns.filter(c => c.roles["category"])[0].displayName;
@@ -84,7 +84,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
         let yColumnName = yIndex == -1 ? "" : metadata.columns.filter(c => c.roles["yAxis"])[0].displayName;
         let valueColumnName = measureIndex == -1 ? "" : metadata.columns.filter(c => c.roles["measure"])[0].displayName;
 
-        console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
+        //console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
 
         let sDataPoints: ScatterDataPoint[] = [];
 
@@ -104,7 +104,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
             let measureCheck = 1;
             measureIndex == -1 ? measureCheck = null : measureCheck = parseFloat(categorical.values[measureIndex].values[i].toString());
             
-            console.log(categorical.categories[categoryIndex]);
+            //console.log(categorical.categories[categoryIndex]);
 
 			sDataPoints.push({
 				category: cat,
@@ -143,22 +143,25 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
         private host: IVisualHost;
         private settings: VisualSettings;
         private svg: d3.Selection<SVGAElement>;
+        private g: d3.Selection<SVGAElement>;
         private selectionManager: ISelectionManager;
 
         constructor(options: VisualConstructorOptions) {
-            console.log('Visual constructor', options);
+            //console.log('Visual constructor', options);
             this.target = options.element;
             this.host = options.host;
             this.selectionManager = options.host.createSelectionManager();
             
             let svg = this.svg = d3.select(this.target).append("svg")
                 .attr("class", "container");
+            
+            let g = this.g = svg.append("g");
 
         }
 
         public update(options: VisualUpdateOptions) {
             this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
-            console.log('Visual update', options);
+            //console.log('Visual update', options);
 
             if(options.viewport.width < 160){
                 this.hideAll();
@@ -172,6 +175,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
             let host = this.host;
 
             let optionBinColor = this.settings.dataPoint.binColor;
+            let optionBinOutline = this.settings.dataPoint.binOutline;
             let optionShowBins = this.settings.dataPoint.showHexbins;
             let optionShowBinLabels = this.settings.dataPoint.showHexbinLabels;
             let optionDotColor = this.settings.dataPoint.dotColor;
@@ -180,7 +184,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
             let optionShowYAxis = this.settings.axes.showYAxis;
 
             let viewModel: ScatterViewModel = visualTransform(options, this.host);
-            console.log('ViewModel', viewModel);
+            //console.log('ViewModel', viewModel);
             
             let margin = {left: 100, right: 10, top: 10, bottom: 50};
             let height = options.viewport.height - margin.top - margin.bottom;
@@ -192,7 +196,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
             let measureRange = d3.extent(data, function(d){ return d.measureValue; });
             //console.log("xRange: ", xRange);
             //console.log("yRange: ", yRange);
-            console.log("measureRange: ", measureRange);
+            //console.log("measureRange: ", measureRange);
             
             let xScale = d3.scale.linear()
                 .domain([0, xRange[1]])
@@ -214,7 +218,8 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
 
             let hexbin = d3.hexbin()
                 .size([width, height])
-                .radius(30);
+                .radius(30)
+                .extent([[0, 0], [width, height]]);;
 
             //console.log(hexbin(points));
 
@@ -226,32 +231,44 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                 .attr("width", options.viewport.width)
                 .attr("height", options.viewport.height);
 
+            svg.select("#clip").remove();
             svg.select(".hexagons").remove();
             svg.select(".hexbinLabels").remove();
             svg.select(".dots").remove();
 
-            let hexagonGroup = svg.append("g")
-                .attr("class", "hexagons");
+            let g = this.g;
 
-            let hexagonLabels = svg.append("g")
+            let clip = g.append("clipPath")
+                .attr("id", "clip")
+                .append("rect")
+                    .attr("class", "clip-rect")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("transform", "translate(" + margin.left + ",0)");
+
+            let hexagonGroup = g.append("g")
+                .attr("class", "hexagons")
+                .attr("clip-path", "url(#clip)");
+
+            let hexagonLabels = g.append("g")
                 .attr("class", "hexbinLabels");
 
             //Axes - over hexagons but under dots
             if(optionShowXAxis){
-                svg.append("g")
+                g.append("g")
                     .attr("class", "axis")
-                    .attr("transform", "translate(0, " + (height - margin.top) + ")")
+                    .attr("transform", "translate(0, " + height + ")")
                     .call(xAxis);
             }
 
             if(optionShowYAxis){
-                svg.append("g")
+                g.append("g")
                     .attr("class", "axis")
                     .attr("transform", "translate(" + margin.left + ", 0)")
                     .call(yAxis);
             }
             
-            let dotGroup = svg.append("g")
+            let dotGroup = g.append("g")
                 .attr("class", "dots")
 
             //Hexagons
@@ -261,10 +278,10 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                 let hexagons = hexagonGroup.selectAll(".hexagon")
                     .data(hexagonData);
 
-                console.log("hexagonData: ", hexagonData);
+                //console.log("hexagonData: ", hexagonData);
 
                 let maxDotsInBin = d3.max(hexagonData.map(function(d){return d.length;}));
-                console.log("maxDotsInBin", maxDotsInBin);
+                //console.log("maxDotsInBin", maxDotsInBin);
 
                 let colorNoMeasureScale = d3.scale.linear()
                     .domain([0, maxDotsInBin])
@@ -275,14 +292,59 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                     .attr("class", "hexagon")
                     .attr("d", hexbin.hexagon())
                     .attr("transform", function(d) { return "translate(" + (d as any).x + "," + (d as any).y + ")"; })
-                    .style("fill", function(d) { return colorNoMeasureScale((d as any).length); });
+                    .style("fill", function(d) { return colorNoMeasureScale((d as any).length); })
+                    .style("stroke", optionBinOutline);
 
                 hexagons.transition()
                     .attr("transform", function(d) { return "translate(" + (d as any).x + "," + (d as any).y + ")"; })
                     .style("fill", function(d) { return colorNoMeasureScale((d as any).length); })
+                    .style("stroke", optionBinOutline)
                     .duration(1000);
                 
                 hexagons.exit().remove();
+
+                if(optionShowBinLabels){
+                    hexagons.on('mouseover', function(d) {
+                        let mouse = d3.mouse(svg.node());
+                        let x = mouse[0];
+                        let y = mouse[1];
+
+                        host.tooltipService.show({
+                            dataItems: [
+                                {displayName: "Density", value: (d as any).length.toString(), header: "Bin Stats" }
+                            ],
+                            identities: [],
+                            coordinates: [x, y],
+                            isTouchEvent: false
+                        });
+                    });
+
+                    hexagons.on('mouseout', function(d) {
+                        d3.select(this).attr({
+                            'r': 4,
+                        });
+
+                        host.tooltipService.hide({
+                            immediately: true,
+                            isTouchEvent: false
+                        });
+                    });
+        
+                    hexagons.on("mousemove", (d) => {
+                        let mouse = d3.mouse(svg.node());
+                        let x = mouse[0];
+                        let y = mouse[1];
+        
+                        host.tooltipService.move({
+                            dataItems: [
+                                {displayName: "Density", value: (d as any).length.toString(), header: "Bin Stats"}
+                            ],
+                            identities: [],
+                            coordinates: [x, y],
+                            isTouchEvent: false
+                        });
+                    });
+                }
             }
 
             //Dots
@@ -301,7 +363,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                     .attr("transform", function(d) { 
                         if(d.xValue == null && d.yValue == null){return "translate(" + margin.left + "," + (height - margin.top) + ")";}
                         else if(d.xValue == null){return "translate(" + margin.left + ",0)";}
-                        else if(d.yValue == null){return "translate(0," + (height - margin.top) + ")";}
+                        else if(d.yValue == null){return "translate(0," + height + ")";}
                         else{return "translate(0,0)";}
                     })
                     .attr('r', 4)
@@ -312,7 +374,6 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                 dots.transition()
                     .attr("cx", function(d) {return xScale(d.xValue); })
                     .attr("cy", function(d) {return yScale(d.yValue); })
-                    //.attr("transform", "translate(" + margin.right + ",0)")
                     .attr('r', 4)
                     .style('fill', function(d) {return d.measureValue != null ? colorMeasureScale(d.measureValue) : optionDotColor; })
                     .duration(2000);
@@ -372,29 +433,9 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                         coordinates: [x, y],
                         isTouchEvent: false
                     });
-                })
+                });
             }
 
-            //Hexagon labels
-            if(optionShowBinLabels){
-                let hexbinLabels = hexagonLabels.selectAll(".hexbinLabels")
-                    .data(hexbin(data.map(function(d){return [xScale(d.xValue), yScale(d.yValue)]})));
-
-                hexbinLabels.enter().append("text")
-                    .attr("class", "hexbinLabels")
-                    .attr("x", function(d) { return (d as any).x - 4*(d as any).length.toString().length; })
-                    .attr("y", function(d) { return (d as any).y; })
-                    .text(function(d) { return (d as any).length; });
-
-                hexbinLabels.transition()
-                    .attr("x", function(d) { return (d as any).x - 4*(d as any).length.toString().length; })
-                    .attr("y", function(d) { return (d as any).y; })
-                    .text(function(d) { return (d as any).length; })
-                    .duration(2000);
-
-                hexbinLabels.exit().remove();
-            }
-        
         }
 
         public hideAll(){
