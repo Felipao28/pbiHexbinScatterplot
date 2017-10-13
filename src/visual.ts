@@ -236,7 +236,12 @@ module powerbi.extensibility.visual {
             let viewModel: ScatterViewModel = visualTransform(options, this.host);
             //console.log('ViewModel', viewModel);
             
-            let margin = {left: 100, right: 10, top: 10, bottom: 50};
+            let margin = {
+                left: optionShowYAxis ? 100 : 10, 
+                right: 10, 
+                top: 10, 
+                bottom: optionShowXAxis ? 50 : 10
+            };
             let height = options.viewport.height - margin.top - margin.bottom;
             let width = options.viewport.width - margin.left - margin.right;
 

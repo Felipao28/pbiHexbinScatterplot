@@ -14472,7 +14472,12 @@ var powerbi;
                         var optionOriginZeroZero = this.settings.axes.originZeroZero;
                         var viewModel = visualTransform(options, this.host);
                         //console.log('ViewModel', viewModel);
-                        var margin = { left: 100, right: 10, top: 10, bottom: 50 };
+                        var margin = {
+                            left: optionShowYAxis ? 100 : 10,
+                            right: 10,
+                            top: 10,
+                            bottom: optionShowXAxis ? 50 : 10
+                        };
                         var height = options.viewport.height - margin.top - margin.bottom;
                         var width = options.viewport.width - margin.left - margin.right;
                         var data = viewModel.scatterDataPoints;
