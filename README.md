@@ -28,7 +28,7 @@ The Image Timeline has options for four fields:
 ## Format Options  
 There are several format options available to customize the scatterplot:  
 
-Hexbin Scatterplot Options
+Hexbin Scatterplot Options  
 ![](https://raw.githubusercontent.com/deldersveld/pbiHexbinScatterplot/master/assets/format-options-hexbin.PNG) 
 - *Show bins* - Show or hide hexbins on the scatterplot.
 - *Show bin stats on hover* - Enable or disable the tooltip when hovering over a hexbin.
@@ -39,7 +39,7 @@ Hexbin Scatterplot Options
 - *Point color* - Control base color of points. If saturation is used, this color represents the darkest in the color scale.
 - *Point size* - Control uniform size of points from 2 to 5 pixels.
 
-Axes Options
+Axes Options  
 ![](https://raw.githubusercontent.com/deldersveld/pbiHexbinScatterplot/master/assets/format-options-axes.PNG) 
 - *Show X axis* - Show or hide the X axis, ticks, and labels.
 - *X title* - Show or hide the X axis title.
