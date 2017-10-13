@@ -14333,6 +14333,8 @@ var powerbi;
             (function (hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1) {
                 "use strict";
                 var DataRoleHelper = powerbi.extensibility.utils.dataview.DataRoleHelper;
+                //powerbi.extensibility.utils.chartutils
+                var axisHelper = powerbi.extensibility.utils.chart.axis;
                 //powerbi.extensibility.utils.formatting
                 var ValueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
                 ;
@@ -14358,13 +14360,14 @@ var powerbi;
                     var xIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "xAxis");
                     var yIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "yAxis");
                     var measureIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "measure");
-                    //console.log(categoryIndex, xIndex, yIndex, measureIndex);
+                    console.log(categoryIndex, xIndex, yIndex, measureIndex);
                     var metadata = dataViews[0].metadata;
                     var categoryColumnName = metadata.columns.filter(function (c) { return c.roles["category"]; })[0].displayName;
                     var xColumnName = xIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["xAxis"]; })[0].displayName;
                     var yColumnName = yIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["yAxis"]; })[0].displayName;
                     var valueColumnName = measureIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["measure"]; })[0].displayName;
-                    //console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
+                    console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
+                    console.log(metadata);
                     var sDataPoints = [];
                     var valueFormatterForCategories;
                     var valueFormatterForX;
@@ -14372,19 +14375,19 @@ var powerbi;
                     var valueFormatterForMeasure;
                     if (xIndex != -1) {
                         valueFormatterForX = ValueFormatter.create({
-                            format: ValueFormatter.getFormatStringByColumn(metadata.columns[xIndex]),
+                            format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["xAxis"]; })[0]),
                             value: categorical.values[xIndex]
                         });
                     }
                     if (yIndex != -1) {
                         valueFormatterForY = ValueFormatter.create({
-                            format: ValueFormatter.getFormatStringByColumn(metadata.columns[yIndex]),
+                            format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["yAxis"]; })[0]),
                             value: categorical.values[yIndex]
                         });
                     }
                     if (measureIndex != -1) {
                         valueFormatterForMeasure = ValueFormatter.create({
-                            format: ValueFormatter.getFormatStringByColumn(metadata.columns[measureIndex]),
+                            format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["measure"]; })[0]),
                             value: categorical.values[measureIndex]
                         });
                     }
@@ -14470,17 +14473,21 @@ var powerbi;
                         //console.log("xRange: ", xRange);
                         //console.log("yRange: ", yRange);
                         //console.log("measureRange: ", measureRange);
+                        var xTicks = axisHelper.getRecommendedNumberOfTicksForXAxis(width);
+                        var yTicks = axisHelper.getRecommendedNumberOfTicksForYAxis(height);
                         var xScale = d3.scale.linear()
                             .domain([0, xRange[1]])
                             .range([margin.left, width + margin.left - margin.right]);
                         var xAxis = d3.svg.axis()
                             .scale(xScale)
+                            .ticks(xTicks)
                             .orient("bottom");
                         var yScale = d3.scale.linear()
                             .domain([0, yRange[1]])
                             .range([height, margin.top]);
                         var yAxis = d3.svg.axis()
                             .scale(yScale)
+                            .ticks(yTicks)
                             .orient("left");
                         //console.log(points);
                         var hexbin = d3.hexbin()
@@ -14498,6 +14505,8 @@ var powerbi;
                         svg.select(".hexagons").remove();
                         svg.select(".hexbinLabels").remove();
                         svg.select(".dots").remove();
+                        svg.select(".x-axis-label").remove();
+                        svg.select(".y-axis-label").remove();
                         var g = this.g;
                         var clip = g.append("clipPath")
                             .attr("id", "clip")
@@ -14517,12 +14526,25 @@ var powerbi;
                                 .attr("class", "axis")
                                 .attr("transform", "translate(0, " + height + ")")
                                 .call(xAxis);
+                            svg.append("text")
+                                .attr("class", "x-axis-label")
+                                .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
+                                .style("text-anchor", "middle")
+                                .text("Date");
                         }
                         if (optionShowYAxis) {
                             g.append("g")
                                 .attr("class", "axis")
                                 .attr("transform", "translate(" + margin.left + ", 0)")
                                 .call(yAxis);
+                            svg.append("text")
+                                .attr("class", "y-axis-label")
+                                .attr("transform", "rotate(-90)")
+                                .attr("y", 5)
+                                .attr("x", 0 - (height / 2))
+                                .attr("dy", "1em")
+                                .style("text-anchor", "middle")
+                                .text("Value");
                         }
                         var dotGroup = g.append("g")
                             .attr("class", "dots");

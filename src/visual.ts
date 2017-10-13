@@ -84,7 +84,7 @@ module powerbi.extensibility.visual {
         let yIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "yAxis");
         let measureIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "measure");
 
-        //console.log(categoryIndex, xIndex, yIndex, measureIndex);
+        console.log(categoryIndex, xIndex, yIndex, measureIndex);
 
         let metadata = dataViews[0].metadata;
         let categoryColumnName = metadata.columns.filter(c => c.roles["category"])[0].displayName;
@@ -92,7 +92,8 @@ module powerbi.extensibility.visual {
         let yColumnName = yIndex == -1 ? "" : metadata.columns.filter(c => c.roles["yAxis"])[0].displayName;
         let valueColumnName = measureIndex == -1 ? "" : metadata.columns.filter(c => c.roles["measure"])[0].displayName;
 
-        //console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
+        console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
+        console.log(metadata);
 
         let sDataPoints: ScatterDataPoint[] = [];
 
@@ -103,21 +104,21 @@ module powerbi.extensibility.visual {
 
         if(xIndex != -1){
             valueFormatterForX = ValueFormatter.create({
-                format: ValueFormatter.getFormatStringByColumn(metadata.columns[xIndex]),
+                format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(c => c.roles["xAxis"])[0]),
                 value: categorical.values[xIndex]
             });
         }
 
         if(yIndex != -1){
             valueFormatterForY = ValueFormatter.create({
-                format: ValueFormatter.getFormatStringByColumn(metadata.columns[yIndex]),
+                format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(c => c.roles["yAxis"])[0]),
                 value: categorical.values[yIndex]
             });
         }
         
         if(measureIndex != -1){
             valueFormatterForMeasure = ValueFormatter.create({
-                format: ValueFormatter.getFormatStringByColumn(metadata.columns[measureIndex]),
+                format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(c => c.roles["measure"])[0]),
                 value: categorical.values[measureIndex]
             });
         }
@@ -231,13 +232,16 @@ module powerbi.extensibility.visual {
             //console.log("xRange: ", xRange);
             //console.log("yRange: ", yRange);
             //console.log("measureRange: ", measureRange);
-            
+            let xTicks = axisHelper.getRecommendedNumberOfTicksForXAxis(width);
+            let yTicks = axisHelper.getRecommendedNumberOfTicksForYAxis(height);
+
             let xScale = d3.scale.linear()
                 .domain([0, xRange[1]])
-                .range([margin.left, width + margin.left - margin.right]);
+                .range([margin.left, width + margin.left - margin.right]);            
 
             let xAxis = d3.svg.axis()
                 .scale(xScale)
+                .ticks(xTicks)
                 .orient("bottom");
             
             let yScale = d3.scale.linear()
@@ -246,6 +250,7 @@ module powerbi.extensibility.visual {
 
             let yAxis = d3.svg.axis()
                 .scale(yScale)
+                .ticks(yTicks)
                 .orient("left");
             
             //console.log(points);
@@ -269,6 +274,8 @@ module powerbi.extensibility.visual {
             svg.select(".hexagons").remove();
             svg.select(".hexbinLabels").remove();
             svg.select(".dots").remove();
+            svg.select(".x-axis-label").remove();
+            svg.select(".y-axis-label").remove();
 
             let g = this.g;
 
@@ -293,6 +300,12 @@ module powerbi.extensibility.visual {
                     .attr("class", "axis")
                     .attr("transform", "translate(0, " + height + ")")
                     .call(xAxis);
+
+                svg.append("text")
+                    .attr("class", "x-axis-label")
+                    .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
+                    .style("text-anchor", "middle")
+                    .text("Date");
             }
 
             if(optionShowYAxis){
@@ -300,6 +313,15 @@ module powerbi.extensibility.visual {
                     .attr("class", "axis")
                     .attr("transform", "translate(" + margin.left + ", 0)")
                     .call(yAxis);
+
+                svg.append("text")
+                    .attr("class", "y-axis-label")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 5)
+                    .attr("x",0 - (height / 2))
+                    .attr("dy", "1em")
+                    .style("text-anchor", "middle")
+                    .text("Value");
             }
             
             let dotGroup = g.append("g")
