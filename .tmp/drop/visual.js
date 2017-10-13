@@ -14745,8 +14745,8 @@ var powerbi;
     (function (visuals) {
         var plugins;
         (function (plugins) {
-            plugins.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG = {
-                name: 'hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG',
+            plugins.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1 = {
+                name: 'hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1',
                 displayName: 'Hexbin Scatterplot',
                 class: 'Visual',
                 version: '1.1.0',
