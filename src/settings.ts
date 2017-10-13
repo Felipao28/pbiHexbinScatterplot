@@ -47,8 +47,10 @@ module powerbi.extensibility.visual {
 
     export class axesSettings {
        public showXAxis: boolean = true;
+       public showXTitle: boolean = true;
        public showYAxis: boolean = true;
-       public originZeroZero: boolean = true;
+       public showYTitle: boolean = true;
+       public originZeroZero: boolean = false;
     }
 
 }

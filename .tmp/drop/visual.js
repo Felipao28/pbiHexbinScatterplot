@@ -14289,8 +14289,10 @@ var powerbi;
                 var axesSettings = (function () {
                     function axesSettings() {
                         this.showXAxis = true;
+                        this.showXTitle = true;
                         this.showYAxis = true;
-                        this.originZeroZero = true;
+                        this.showYTitle = true;
+                        this.originZeroZero = false;
                     }
                     return axesSettings;
                 }());
@@ -14376,6 +14378,10 @@ var powerbi;
                     var valueFormatterForX;
                     var valueFormatterForY;
                     var valueFormatterForMeasure;
+                    valueFormatterForCategories = ValueFormatter.create({
+                        format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["category"]; })[0]),
+                        value: categorical.categories[categoryIndex]
+                    });
                     if (xIndex != -1) {
                         valueFormatterForX = ValueFormatter.create({
                             format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["xAxis"]; })[0]),
@@ -14413,7 +14419,7 @@ var powerbi;
                             measureValue: measureCheck,
                             tooltips: [{
                                     displayName: categoryColumnName,
-                                    value: cat != null ? cat.toString() : "(BLANK)",
+                                    value: cat != null ? valueFormatterForCategories.format(cat).toString() : "(BLANK)",
                                     header: "Point Values"
                                 },
                                 {
@@ -14469,14 +14475,16 @@ var powerbi;
                         var optionShowDots = this.settings.dataPoint.showDots;
                         var optionShowXAxis = this.settings.axes.showXAxis;
                         var optionShowYAxis = this.settings.axes.showYAxis;
+                        var optionShowXTitle = this.settings.axes.showXTitle;
+                        var optionShowYTitle = this.settings.axes.showYTitle;
                         var optionOriginZeroZero = this.settings.axes.originZeroZero;
                         var viewModel = visualTransform(options, this.host);
                         //console.log('ViewModel', viewModel);
                         var margin = {
-                            left: optionShowYAxis ? 100 : 10,
+                            left: optionShowYAxis ? 100 : 25,
                             right: 10,
                             top: 10,
-                            bottom: optionShowXAxis ? 50 : 10
+                            bottom: optionShowXAxis ? 50 : 15
                         };
                         var height = options.viewport.height - margin.top - margin.bottom;
                         var width = options.viewport.width - margin.left - margin.right;
@@ -14489,21 +14497,26 @@ var powerbi;
                         //console.log("measureRange: ", measureRange);
                         var xTicks = axisHelper.getRecommendedNumberOfTicksForXAxis(width);
                         var yTicks = axisHelper.getRecommendedNumberOfTicksForYAxis(height);
+                        var xTickFormat = d3.format(".2s"); //.1f
+                        var yTickFormat = d3.format(".2s");
+                        if (options.viewport.width < 240) {
+                            xTickFormat = "...";
+                        }
                         var xScale = d3.scale.linear()
-                            .domain(optionOriginZeroZero ? [0, xRange[1]] : [xRange[0], xRange[1]])
+                            .domain(optionOriginZeroZero ? [0, xRange[1] + 1] : [xRange[0] - 1, xRange[1] + 1])
                             .range([margin.left, width + margin.left - margin.right]);
                         var xAxis = d3.svg.axis()
                             .scale(xScale)
                             .ticks(xTicks)
-                            .tickFormat(d3.format(".2s"))
+                            .tickFormat(xTickFormat)
                             .orient("bottom");
                         var yScale = d3.scale.linear()
-                            .domain(optionOriginZeroZero ? [0, yRange[1]] : [yRange[0], yRange[1]])
+                            .domain(optionOriginZeroZero ? [0, yRange[1] + 1] : [yRange[0] - 1, yRange[1] + 1])
                             .range([height, margin.top]);
                         var yAxis = d3.svg.axis()
                             .scale(yScale)
                             .ticks(yTicks)
-                            .tickFormat(d3.format(".2s"))
+                            .tickFormat(yTickFormat)
                             .orient("left");
                         //console.log(points);
                         var hexbin = d3.hexbin()
@@ -14543,6 +14556,8 @@ var powerbi;
                                     .attr("class", "axis")
                                     .attr("transform", "translate(0, " + height + ")")
                                     .call(xAxis);
+                            }
+                            if (optionShowXTitle) {
                                 svg.append("text")
                                     .attr("class", "x-axis-label")
                                     .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
@@ -14554,6 +14569,8 @@ var powerbi;
                                     .attr("class", "axis")
                                     .attr("transform", "translate(" + margin.left + ", 0)")
                                     .call(yAxis);
+                            }
+                            if (optionShowYTitle) {
                                 svg.append("text")
                                     .attr("class", "y-axis-label")
                                     .attr("transform", "rotate(-90)")
@@ -14745,8 +14762,8 @@ var powerbi;
     (function (visuals) {
         var plugins;
         (function (plugins) {
-            plugins.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1 = {
-                name: 'hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1',
+            plugins.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG = {
+                name: 'hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG',
                 displayName: 'Hexbin Scatterplot',
                 class: 'Visual',
                 version: '1.1.0',

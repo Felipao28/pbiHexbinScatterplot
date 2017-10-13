@@ -1,6 +1,6 @@
 module powerbi.visuals.plugins {
-    export var hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1 = {
-        name: 'hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1',
+    export var hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG = {
+        name: 'hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG',
         displayName: 'Hexbin Scatterplot',
         class: 'Visual',
         version: '1.1.0',

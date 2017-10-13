@@ -47,8 +47,10 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
 
     export class axesSettings {
        public showXAxis: boolean = true;
+       public showXTitle: boolean = true;
        public showYAxis: boolean = true;
-       public originZeroZero: boolean = true;
+       public showYTitle: boolean = true;
+       public originZeroZero: boolean = false;
     }
 
 }

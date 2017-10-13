@@ -110,6 +110,11 @@ module powerbi.extensibility.visual {
         let valueFormatterForY: IValueFormatter;
         let valueFormatterForMeasure: IValueFormatter;
 
+        valueFormatterForCategories = ValueFormatter.create({
+            format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(c => c.roles["category"])[0]),
+            value: categorical.categories[categoryIndex]
+        });
+
         if(xIndex != -1){
             valueFormatterForX = ValueFormatter.create({
                 format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(c => c.roles["xAxis"])[0]),
@@ -157,7 +162,7 @@ module powerbi.extensibility.visual {
                 measureValue: measureCheck,
                 tooltips: [{
                         displayName: categoryColumnName,
-                        value: cat != null ? cat.toString() : "(BLANK)",
+                        value: cat != null ? valueFormatterForCategories.format(cat).toString() : "(BLANK)",
                         header: "Point Values"
                     },
                     {
@@ -231,16 +236,18 @@ module powerbi.extensibility.visual {
             let optionShowDots = this.settings.dataPoint.showDots;
             let optionShowXAxis = this.settings.axes.showXAxis;
             let optionShowYAxis = this.settings.axes.showYAxis;
+            let optionShowXTitle = this.settings.axes.showXTitle;
+            let optionShowYTitle = this.settings.axes.showYTitle;
             let optionOriginZeroZero = this.settings.axes.originZeroZero;
 
             let viewModel: ScatterViewModel = visualTransform(options, this.host);
             //console.log('ViewModel', viewModel);
             
             let margin = {
-                left: optionShowYAxis ? 100 : 10, 
+                left: optionShowYAxis ? 100 : 25, 
                 right: 10, 
                 top: 10, 
-                bottom: optionShowXAxis ? 50 : 10
+                bottom: optionShowXAxis ? 50 : 15
             };
             let height = options.viewport.height - margin.top - margin.bottom;
             let width = options.viewport.width - margin.left - margin.right;
@@ -255,24 +262,30 @@ module powerbi.extensibility.visual {
             let xTicks = axisHelper.getRecommendedNumberOfTicksForXAxis(width);
             let yTicks = axisHelper.getRecommendedNumberOfTicksForYAxis(height);
 
+            let xTickFormat = d3.format(".2s");//.1f
+            let yTickFormat = d3.format(".2s"); 
+            if(options.viewport.width < 240){
+                xTickFormat = "..."
+            }
+
             let xScale = d3.scale.linear()
-                .domain(optionOriginZeroZero ? [0, xRange[1]] : [xRange[0], xRange[1]])
+                .domain(optionOriginZeroZero ? [0, xRange[1]+1] : [xRange[0]-1, xRange[1]+1])
                 .range([margin.left, width + margin.left - margin.right]);            
 
             let xAxis = d3.svg.axis()
                 .scale(xScale)
                 .ticks(xTicks)
-                .tickFormat(d3.format(".2s"))
+                .tickFormat(xTickFormat)
                 .orient("bottom");
             
             let yScale = d3.scale.linear()
-                .domain(optionOriginZeroZero ? [0, yRange[1]] : [yRange[0], yRange[1]])
+                .domain(optionOriginZeroZero ? [0, yRange[1]+1] : [yRange[0]-1, yRange[1]+1])
                 .range([height, margin.top]);
 
             let yAxis = d3.svg.axis()
                 .scale(yScale)
                 .ticks(yTicks)
-                .tickFormat(d3.format(".2s"))
+                .tickFormat(yTickFormat)
                 .orient("left");
             
             //console.log(points);
@@ -322,7 +335,9 @@ module powerbi.extensibility.visual {
                         .attr("class", "axis")
                         .attr("transform", "translate(0, " + height + ")")
                         .call(xAxis);
+                }
 
+                if(optionShowXTitle){
                     svg.append("text")
                         .attr("class", "x-axis-label")
                         .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
@@ -335,7 +350,9 @@ module powerbi.extensibility.visual {
                         .attr("class", "axis")
                         .attr("transform", "translate(" + margin.left + ", 0)")
                         .call(yAxis);
+                }
 
+                if(optionShowYTitle){
                     svg.append("text")
                         .attr("class", "y-axis-label")
                         .attr("transform", "rotate(-90)")

@@ -98,8 +98,20 @@
                         "bool": true
                     }
                 },
+                "showXTitle": {
+                    "displayName": "X title",
+                    "type": {
+                        "bool": true
+                    }
+                },
                 "showYAxis": {
                     "displayName": "Show Y axis",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "showYTitle": {
+                    "displayName": "Y title",
                     "type": {
                         "bool": true
                     }
