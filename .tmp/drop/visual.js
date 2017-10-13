@@ -14277,6 +14277,7 @@ var powerbi;
                         this.showHexbins = true;
                         this.showHexbinLabels = true;
                         this.binColor = "#01B8AA";
+                        this.binRadius = "30";
                         this.binOutline = "#FFFFFF";
                         this.showDots = true;
                         this.dotColor = "#374649";
@@ -14468,6 +14469,7 @@ var powerbi;
                         var selectionManager = this.selectionManager;
                         var host = this.host;
                         var optionBinColor = this.settings.dataPoint.binColor;
+                        var optionBinRadius = this.settings.dataPoint.binRadius;
                         var optionBinOutline = this.settings.dataPoint.binOutline;
                         var optionShowBins = this.settings.dataPoint.showHexbins;
                         var optionShowBinLabels = this.settings.dataPoint.showHexbinLabels;
@@ -14521,7 +14523,7 @@ var powerbi;
                         //console.log(points);
                         var hexbin = d3.hexbin()
                             .size([width, height])
-                            .radius(30)
+                            .radius(optionBinRadius)
                             .extent([[0, 0], [width, height]]);
                         ;
                         //console.log(hexbin(points));

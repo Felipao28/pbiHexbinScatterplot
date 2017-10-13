@@ -37,6 +37,7 @@ module powerbi.extensibility.visual {
       public showHexbins: boolean = true;
       public showHexbinLabels: boolean = true;
       public binColor: string = "#01B8AA";
+      public binRadius: string = "30";
       public binOutline: string = "#FFFFFF";
       public showDots: boolean = true;
       public dotColor: string = "#374649";

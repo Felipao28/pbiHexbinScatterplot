@@ -229,6 +229,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
             let host = this.host;
 
             let optionBinColor = this.settings.dataPoint.binColor;
+            let optionBinRadius = this.settings.dataPoint.binRadius;
             let optionBinOutline = this.settings.dataPoint.binOutline;
             let optionShowBins = this.settings.dataPoint.showHexbins;
             let optionShowBinLabels = this.settings.dataPoint.showHexbinLabels;
@@ -292,7 +293,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
 
             let hexbin = d3.hexbin()
                 .size([width, height])
-                .radius(30)
+                .radius(optionBinRadius)
                 .extent([[0, 0], [width, height]]);;
 
             //console.log(hexbin(points));

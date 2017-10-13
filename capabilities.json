@@ -35,6 +35,18 @@
                         }
                     }
                 },
+                "binRadius": {
+                    "displayName": "Bin radius",
+                    "type": {
+                        "enumeration": [
+                            {"value": "10", "displayName": "10"},
+                            {"value": "20", "displayName": "20"},
+                            {"value": "30", "displayName": "30"},
+                            {"value": "40", "displayName": "40"},
+                            {"value": "50", "displayName": "50"}
+                        ]
+                    }
+                },
                 "showHexbins": {
                     "displayName": "Show bins",
                     "type": {
