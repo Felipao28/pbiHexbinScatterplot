@@ -56,6 +56,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
     interface ScatterMetaData {
         xAxisLabel: string;
         yAxisLabel: string;
+        measureIndex: number;
     }
 
     interface ScatterViewModel {
@@ -110,56 +111,69 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
         let valueFormatterForY: IValueFormatter;
         let valueFormatterForMeasure: IValueFormatter;
 
+        let xValues = [];
+        let yValues = [];
+        let measureValues = [];
+
         valueFormatterForCategories = ValueFormatter.create({
             format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(c => c.roles["category"])[0]),
             value: categorical.categories[categoryIndex]
         });
 
+        //validate X, nulls to 0
         if(xIndex != -1){
+            xValues = categorical.values[xIndex].values.map(function(x) {
+                if (x == null) {
+                    return 0;
+                }
+                return x;
+            });
+            
             valueFormatterForX = ValueFormatter.create({
                 format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(c => c.roles["xAxis"])[0]),
                 value: categorical.values[xIndex]
             });
         }
 
+        //validate Y, nulls to 0
         if(yIndex != -1){
+            yValues = categorical.values[yIndex].values.map(function(x) {
+                if (x == null) {
+                    return 0;
+                }
+                return x;
+            });
+
             valueFormatterForY = ValueFormatter.create({
                 format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(c => c.roles["yAxis"])[0]),
                 value: categorical.values[yIndex]
             });
         }
         
+        //validate Measure, nulls to 0
         if(measureIndex != -1){
+            measureValues = categorical.values[measureIndex].values.map(function(x) {
+                if (x == null) {
+                    return 0;
+                }
+                return x;
+            });
+
             valueFormatterForMeasure = ValueFormatter.create({
                 format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(c => c.roles["measure"])[0]),
                 value: categorical.values[measureIndex]
             });
         }
-        
 
         for (let i = 0, len = category.values.length; i < len; i++) {
             
-            let cat = <string>categorical.categories[0].values[i];
-
-            //validate x
-            let xCheck = 1;
-            xIndex == -1 ? xCheck = null : xCheck = parseFloat(categorical.values[xIndex].values[i].toString());
-
-            //validate y
-            let yCheck = 1;
-            yIndex == -1 ? yCheck = null : yCheck = parseFloat(categorical.values[yIndex].values[i].toString());
-
-            //validate measure
-            let measureCheck = 1;
-            measureIndex == -1 ? measureCheck = null : measureCheck = parseFloat(categorical.values[measureIndex].values[i].toString());
-            
-            //console.log(categorical.categories[categoryIndex]);
+            let cat = <string>categorical.categories[0].values[i];    
 
 			sDataPoints.push({
 				category: cat,
-                xValue: xCheck,
-                yValue: yCheck,
-                measureValue: measureCheck,
+                xValue: xIndex == -1 ? 0 : xValues[i],
+                yValue: yIndex == -1 ? 0 : yValues[i],
+                measureValue: measureIndex == -1 ? 0 : measureValues[i],
                 tooltips: [{
                         displayName: categoryColumnName,
                         value: cat != null ? valueFormatterForCategories.format(cat).toString() : "(BLANK)",
@@ -167,15 +181,15 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                     },
                     {
                         displayName: xColumnName,
-                        value: xCheck != null ? valueFormatterForX.format(xCheck).toString() : ""
+                        value: xIndex == -1 ? "" : valueFormatterForX.format(xValues[i]).toString()
                     },
                     {
                         displayName: yColumnName,
-                        value: yCheck != null ? valueFormatterForY.format(yCheck).toString() : ""
+                        value: yIndex == -1 ? "" : valueFormatterForY.format(yValues[i]).toString()
                     },
                     {
                         displayName: valueColumnName,
-                        value: measureCheck != null ? valueFormatterForMeasure.format(measureCheck).toString() : ""
+                        value: measureIndex == -1 ? "" : valueFormatterForMeasure.format(measureValues[i]).toString()
                     }],
                 selectionId: host.createSelectionIdBuilder().withCategory(category, i).createSelectionId()
 			});
@@ -184,7 +198,8 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
 
         sMetaData.push({
             xAxisLabel: xColumnName,
-            yAxisLabel: yColumnName
+            yAxisLabel: yColumnName,
+            measureIndex: measureIndex
         });
 
         return {
@@ -464,7 +479,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                             else{return "translate(0,0)";}
                         })
                         .attr('r', optionDotSize)
-                        .style('fill', function(d) {return d.measureValue != null ? colorMeasureScale(d.measureValue) : optionDotColor; })
+                        .style('fill', function(d) {return viewModel.scatterMetaData[0].measureIndex > -1 ? colorMeasureScale(d.measureValue) : optionDotColor; })
                         .style('border-radius', 1)
                         .style('stroke', '#444444');
                     
@@ -472,7 +487,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                         .attr("cx", function(d) {return xScale(d.xValue); })
                         .attr("cy", function(d) {return yScale(d.yValue); })
                         .attr('r', optionDotSize)
-                        .style('fill', function(d) {return d.measureValue != null ? colorMeasureScale(d.measureValue) : optionDotColor; })
+                        .style('fill', function(d) {return viewModel.scatterMetaData[0].measureIndex > -1 ? colorMeasureScale(d.measureValue) : optionDotColor; })
                         .duration(2000);
 
                     dots.exit().remove();

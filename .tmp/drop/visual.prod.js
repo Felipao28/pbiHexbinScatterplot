@@ -14378,23 +14378,47 @@ var powerbi;
                     var valueFormatterForX;
                     var valueFormatterForY;
                     var valueFormatterForMeasure;
+                    var xValues = [];
+                    var yValues = [];
+                    var measureValues = [];
                     valueFormatterForCategories = ValueFormatter.create({
                         format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["category"]; })[0]),
                         value: categorical.categories[categoryIndex]
                     });
+                    //validate X, nulls to 0
                     if (xIndex != -1) {
+                        xValues = categorical.values[xIndex].values.map(function (x) {
+                            if (x == null) {
+                                return 0;
+                            }
+                            return x;
+                        });
                         valueFormatterForX = ValueFormatter.create({
                             format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["xAxis"]; })[0]),
                             value: categorical.values[xIndex]
                         });
                     }
+                    //validate Y, nulls to 0
                     if (yIndex != -1) {
+                        yValues = categorical.values[yIndex].values.map(function (x) {
+                            if (x == null) {
+                                return 0;
+                            }
+                            return x;
+                        });
                         valueFormatterForY = ValueFormatter.create({
                             format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["yAxis"]; })[0]),
                             value: categorical.values[yIndex]
                         });
                     }
+                    //validate Measure, nulls to 0
                     if (measureIndex != -1) {
+                        measureValues = categorical.values[measureIndex].values.map(function (x) {
+                            if (x == null) {
+                                return 0;
+                            }
+                            return x;
+                        });
                         valueFormatterForMeasure = ValueFormatter.create({
                             format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["measure"]; })[0]),
                             value: categorical.values[measureIndex]
@@ -14402,21 +14426,11 @@ var powerbi;
                     }
                     for (var i = 0, len = category.values.length; i < len; i++) {
                         var cat = categorical.categories[0].values[i];
-                        //validate x
-                        var xCheck = 1;
-                        xIndex == -1 ? xCheck = null : xCheck = parseFloat(categorical.values[xIndex].values[i].toString());
-                        //validate y
-                        var yCheck = 1;
-                        yIndex == -1 ? yCheck = null : yCheck = parseFloat(categorical.values[yIndex].values[i].toString());
-                        //validate measure
-                        var measureCheck = 1;
-                        measureIndex == -1 ? measureCheck = null : measureCheck = parseFloat(categorical.values[measureIndex].values[i].toString());
-                        //console.log(categorical.categories[categoryIndex]);
                         sDataPoints.push({
                             category: cat,
-                            xValue: xCheck,
-                            yValue: yCheck,
-                            measureValue: measureCheck,
+                            xValue: xIndex == -1 ? 0 : xValues[i],
+                            yValue: yIndex == -1 ? 0 : yValues[i],
+                            measureValue: measureIndex == -1 ? 0 : measureValues[i],
                             tooltips: [{
                                     displayName: categoryColumnName,
                                     value: cat != null ? valueFormatterForCategories.format(cat).toString() : "(BLANK)",
@@ -14424,22 +14438,23 @@ var powerbi;
                                 },
                                 {
                                     displayName: xColumnName,
-                                    value: xCheck != null ? valueFormatterForX.format(xCheck).toString() : ""
+                                    value: xIndex == -1 ? "" : valueFormatterForX.format(xValues[i]).toString()
                                 },
                                 {
                                     displayName: yColumnName,
-                                    value: yCheck != null ? valueFormatterForY.format(yCheck).toString() : ""
+                                    value: yIndex == -1 ? "" : valueFormatterForY.format(yValues[i]).toString()
                                 },
                                 {
                                     displayName: valueColumnName,
-                                    value: measureCheck != null ? valueFormatterForMeasure.format(measureCheck).toString() : ""
+                                    value: measureIndex == -1 ? "" : valueFormatterForMeasure.format(measureValues[i]).toString()
                                 }],
                             selectionId: host.createSelectionIdBuilder().withCategory(category, i).createSelectionId()
                         });
                     }
                     sMetaData.push({
                         xAxisLabel: xColumnName,
-                        yAxisLabel: yColumnName
+                        yAxisLabel: yColumnName,
+                        measureIndex: measureIndex
                     });
                     return {
                         scatterDataPoints: sDataPoints,
@@ -14672,14 +14687,14 @@ var powerbi;
                                     }
                                 })
                                     .attr('r', optionDotSize)
-                                    .style('fill', function (d) { return d.measureValue != null ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
+                                    .style('fill', function (d) { return viewModel.scatterMetaData[0].measureIndex > -1 ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
                                     .style('border-radius', 1)
                                     .style('stroke', '#444444');
                                 dots_1.transition()
                                     .attr("cx", function (d) { return xScale(d.xValue); })
                                     .attr("cy", function (d) { return yScale(d.yValue); })
                                     .attr('r', optionDotSize)
-                                    .style('fill', function (d) { return d.measureValue != null ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
+                                    .style('fill', function (d) { return viewModel.scatterMetaData[0].measureIndex > -1 ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
                                     .duration(2000);
                                 dots_1.exit().remove();
                                 dots_1.on('click', function (d) {
