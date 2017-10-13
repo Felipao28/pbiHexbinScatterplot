@@ -14495,6 +14495,7 @@ var powerbi;
                         var xAxis = d3.svg.axis()
                             .scale(xScale)
                             .ticks(xTicks)
+                            .tickFormat(d3.format(".2s"))
                             .orient("bottom");
                         var yScale = d3.scale.linear()
                             .domain(optionOriginZeroZero ? [0, yRange[1]] : [yRange[0], yRange[1]])
@@ -14502,6 +14503,7 @@ var powerbi;
                         var yAxis = d3.svg.axis()
                             .scale(yScale)
                             .ticks(yTicks)
+                            .tickFormat(d3.format(".2s"))
                             .orient("left");
                         //console.log(points);
                         var hexbin = d3.hexbin()

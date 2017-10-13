@@ -262,6 +262,7 @@ module powerbi.extensibility.visual {
             let xAxis = d3.svg.axis()
                 .scale(xScale)
                 .ticks(xTicks)
+                .tickFormat(d3.format(".2s"))
                 .orient("bottom");
             
             let yScale = d3.scale.linear()
@@ -271,6 +272,7 @@ module powerbi.extensibility.visual {
             let yAxis = d3.svg.axis()
                 .scale(yScale)
                 .ticks(yTicks)
+                .tickFormat(d3.format(".2s"))
                 .orient("left");
             
             //console.log(points);
