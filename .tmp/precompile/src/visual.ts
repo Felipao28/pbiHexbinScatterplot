@@ -53,8 +53,14 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
 		selectionId: powerbi.visuals.ISelectionId;
     };
 
+    interface ScatterMetaData {
+        xAxisLabel: string;
+        yAxisLabel: string;
+    }
+
     interface ScatterViewModel {
-		scatterDataPoints: ScatterDataPoint[];
+        scatterDataPoints: ScatterDataPoint[];
+        scatterMetaData: ScatterMetaData[];
     }
 
     function visualTransform(options: VisualUpdateOptions, host: IVisualHost): any {
@@ -62,7 +68,8 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
 		//console.log('visualTransform', dataViews);
 		
 		let viewModel: ScatterViewModel = {
-            scatterDataPoints: []
+            scatterDataPoints: [],
+            scatterMetaData: []
         };
 		
 		if (!dataViews
@@ -84,7 +91,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
         let yIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "yAxis");
         let measureIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "measure");
 
-        console.log(categoryIndex, xIndex, yIndex, measureIndex);
+        //console.log(categoryIndex, xIndex, yIndex, measureIndex);
 
         let metadata = dataViews[0].metadata;
         let categoryColumnName = metadata.columns.filter(c => c.roles["category"])[0].displayName;
@@ -92,10 +99,11 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
         let yColumnName = yIndex == -1 ? "" : metadata.columns.filter(c => c.roles["yAxis"])[0].displayName;
         let valueColumnName = measureIndex == -1 ? "" : metadata.columns.filter(c => c.roles["measure"])[0].displayName;
 
-        console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
-        console.log(metadata);
+        //console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
+        //console.log(metadata);
 
         let sDataPoints: ScatterDataPoint[] = [];
+        let sMetaData: ScatterMetaData[] = [];
 
         let valueFormatterForCategories: IValueFormatter;
         let valueFormatterForX: IValueFormatter;
@@ -169,8 +177,14 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
 				
         }
 
+        sMetaData.push({
+            xAxisLabel: xColumnName,
+            yAxisLabel: yColumnName
+        });
+
         return {
-            scatterDataPoints: sDataPoints
+            scatterDataPoints: sDataPoints,
+            scatterMetaData: sMetaData
         };
     }
 
@@ -305,7 +319,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                     .attr("class", "x-axis-label")
                     .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
                     .style("text-anchor", "middle")
-                    .text("Date");
+                    .text(viewModel.scatterMetaData[0].xAxisLabel);
             }
 
             if(optionShowYAxis){
@@ -321,7 +335,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                     .attr("x",0 - (height / 2))
                     .attr("dy", "1em")
                     .style("text-anchor", "middle")
-                    .text("Value");
+                    .text(viewModel.scatterMetaData[0].yAxisLabel);
             }
             
             let dotGroup = g.append("g")

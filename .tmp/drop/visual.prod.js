@@ -14342,7 +14342,8 @@ var powerbi;
                     var dataViews = options.dataViews;
                     //console.log('visualTransform', dataViews);
                     var viewModel = {
-                        scatterDataPoints: []
+                        scatterDataPoints: [],
+                        scatterMetaData: []
                     };
                     if (!dataViews
                         || !dataViews[0]
@@ -14360,15 +14361,16 @@ var powerbi;
                     var xIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "xAxis");
                     var yIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "yAxis");
                     var measureIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "measure");
-                    console.log(categoryIndex, xIndex, yIndex, measureIndex);
+                    //console.log(categoryIndex, xIndex, yIndex, measureIndex);
                     var metadata = dataViews[0].metadata;
                     var categoryColumnName = metadata.columns.filter(function (c) { return c.roles["category"]; })[0].displayName;
                     var xColumnName = xIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["xAxis"]; })[0].displayName;
                     var yColumnName = yIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["yAxis"]; })[0].displayName;
                     var valueColumnName = measureIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["measure"]; })[0].displayName;
-                    console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
-                    console.log(metadata);
+                    //console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
+                    //console.log(metadata);
                     var sDataPoints = [];
+                    var sMetaData = [];
                     var valueFormatterForCategories;
                     var valueFormatterForX;
                     var valueFormatterForY;
@@ -14428,8 +14430,13 @@ var powerbi;
                             selectionId: host.createSelectionIdBuilder().withCategory(category, i).createSelectionId()
                         });
                     }
+                    sMetaData.push({
+                        xAxisLabel: xColumnName,
+                        yAxisLabel: yColumnName
+                    });
                     return {
-                        scatterDataPoints: sDataPoints
+                        scatterDataPoints: sDataPoints,
+                        scatterMetaData: sMetaData
                     };
                 }
                 var Visual = (function () {
@@ -14530,7 +14537,7 @@ var powerbi;
                                 .attr("class", "x-axis-label")
                                 .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
                                 .style("text-anchor", "middle")
-                                .text("Date");
+                                .text(viewModel.scatterMetaData[0].xAxisLabel);
                         }
                         if (optionShowYAxis) {
                             g.append("g")
@@ -14544,7 +14551,7 @@ var powerbi;
                                 .attr("x", 0 - (height / 2))
                                 .attr("dy", "1em")
                                 .style("text-anchor", "middle")
-                                .text("Value");
+                                .text(viewModel.scatterMetaData[0].yAxisLabel);
                         }
                         var dotGroup = g.append("g")
                             .attr("class", "dots");
