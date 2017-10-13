@@ -103,6 +103,12 @@
                     "type": {
                         "bool": true
                     }
+                },
+                "originZeroZero": {
+                    "displayName": "Origin at (0,0)",
+                    "type": {
+                        "bool": true
+                    }
                 }
             }
         }

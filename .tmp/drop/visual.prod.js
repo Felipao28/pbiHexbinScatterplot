@@ -14290,6 +14290,7 @@ var powerbi;
                     function axesSettings() {
                         this.showXAxis = true;
                         this.showYAxis = true;
+                        this.originZeroZero = true;
                     }
                     return axesSettings;
                 }());
@@ -14468,6 +14469,7 @@ var powerbi;
                         var optionShowDots = this.settings.dataPoint.showDots;
                         var optionShowXAxis = this.settings.axes.showXAxis;
                         var optionShowYAxis = this.settings.axes.showYAxis;
+                        var optionOriginZeroZero = this.settings.axes.originZeroZero;
                         var viewModel = visualTransform(options, this.host);
                         //console.log('ViewModel', viewModel);
                         var margin = { left: 100, right: 10, top: 10, bottom: 50 };
@@ -14483,14 +14485,14 @@ var powerbi;
                         var xTicks = axisHelper.getRecommendedNumberOfTicksForXAxis(width);
                         var yTicks = axisHelper.getRecommendedNumberOfTicksForYAxis(height);
                         var xScale = d3.scale.linear()
-                            .domain([xRange[0], xRange[1]])
+                            .domain(optionOriginZeroZero ? [0, xRange[1]] : [xRange[0], xRange[1]])
                             .range([margin.left, width + margin.left - margin.right]);
                         var xAxis = d3.svg.axis()
                             .scale(xScale)
                             .ticks(xTicks)
                             .orient("bottom");
                         var yScale = d3.scale.linear()
-                            .domain([yRange[0], yRange[1]])
+                            .domain(optionOriginZeroZero ? [0, yRange[1]] : [yRange[0], yRange[1]])
                             .range([height, margin.top]);
                         var yAxis = d3.svg.axis()
                             .scale(yScale)

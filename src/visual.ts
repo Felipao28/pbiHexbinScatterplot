@@ -231,6 +231,7 @@ module powerbi.extensibility.visual {
             let optionShowDots = this.settings.dataPoint.showDots;
             let optionShowXAxis = this.settings.axes.showXAxis;
             let optionShowYAxis = this.settings.axes.showYAxis;
+            let optionOriginZeroZero = this.settings.axes.originZeroZero;
 
             let viewModel: ScatterViewModel = visualTransform(options, this.host);
             //console.log('ViewModel', viewModel);
@@ -250,7 +251,7 @@ module powerbi.extensibility.visual {
             let yTicks = axisHelper.getRecommendedNumberOfTicksForYAxis(height);
 
             let xScale = d3.scale.linear()
-                .domain([xRange[0], xRange[1]])
+                .domain(optionOriginZeroZero ? [0, xRange[1]] : [xRange[0], xRange[1]])
                 .range([margin.left, width + margin.left - margin.right]);            
 
             let xAxis = d3.svg.axis()
@@ -259,7 +260,7 @@ module powerbi.extensibility.visual {
                 .orient("bottom");
             
             let yScale = d3.scale.linear()
-                .domain([yRange[0], yRange[1]])
+                .domain(optionOriginZeroZero ? [0, yRange[1]] : [yRange[0], yRange[1]])
                 .range([height, margin.top]);
 
             let yAxis = d3.svg.axis()
