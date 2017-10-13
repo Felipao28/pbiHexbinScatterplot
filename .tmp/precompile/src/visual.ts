@@ -31,10 +31,18 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
 
     import DataViewValueColumnGroup = powerbi.DataViewValueColumnGroup;
     import DataRoleHelper = powerbi.extensibility.utils.dataview.DataRoleHelper;
+    
+    //powerbi.extensibility.utils.tooltip
     import tooltip = powerbi.extensibility.utils.tooltip;
     import TooltipEnabledDataPoint = powerbi.extensibility.utils.tooltip.TooltipEnabledDataPoint;
     import TooltipEventArgs = powerbi.extensibility.utils.tooltip.TooltipEventArgs;
+    
+    //powerbi.extensibility.utils.chartutils
     import axisHelper = powerbi.extensibility.utils.chart.axis;
+    
+    //powerbi.extensibility.utils.formatting
+    import ValueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
+    import IValueFormatter = powerbi.extensibility.utils.formatting.IValueFormatter;
 
     interface ScatterDataPoint {
 		category: string;
@@ -88,6 +96,33 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
 
         let sDataPoints: ScatterDataPoint[] = [];
 
+        let valueFormatterForCategories: IValueFormatter;
+        let valueFormatterForX: IValueFormatter;
+        let valueFormatterForY: IValueFormatter;
+        let valueFormatterForMeasure: IValueFormatter;
+
+        if(xIndex != -1){
+            valueFormatterForX = ValueFormatter.create({
+                format: ValueFormatter.getFormatStringByColumn(metadata.columns[xIndex]),
+                value: categorical.values[xIndex]
+            });
+        }
+
+        if(yIndex != -1){
+            valueFormatterForY = ValueFormatter.create({
+                format: ValueFormatter.getFormatStringByColumn(metadata.columns[yIndex]),
+                value: categorical.values[yIndex]
+            });
+        }
+        
+        if(measureIndex != -1){
+            valueFormatterForMeasure = ValueFormatter.create({
+                format: ValueFormatter.getFormatStringByColumn(metadata.columns[measureIndex]),
+                value: categorical.values[measureIndex]
+            });
+        }
+        
+
         for (let i = 0, len = category.values.length; i < len; i++) {
             
             let cat = <string>categorical.categories[0].values[i];
@@ -113,20 +148,20 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                 measureValue: measureCheck,
                 tooltips: [{
                         displayName: categoryColumnName,
-                        value: cat != null ? cat.toString() : "(BLANK)"//,
-                        //header: sequenceDisplay
+                        value: cat != null ? cat.toString() : "(BLANK)",
+                        header: "Point Values"
                     },
                     {
                         displayName: xColumnName,
-                        value: xCheck != null ? xCheck.toString() : ""
+                        value: xCheck != null ? valueFormatterForX.format(xCheck).toString() : ""
                     },
                     {
                         displayName: yColumnName,
-                        value: yCheck != null ? yCheck.toString() : ""
+                        value: yCheck != null ? valueFormatterForY.format(yCheck).toString() : ""
                     },
                     {
                         displayName: valueColumnName,
-                        value: measureCheck != null ? measureCheck.toString() : ""
+                        value: measureCheck != null ? valueFormatterForMeasure.format(measureCheck).toString() : ""
                     }],
                 selectionId: host.createSelectionIdBuilder().withCategory(category, i).createSelectionId()
 			});
@@ -163,13 +198,12 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
             this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
             //console.log('Visual update', options);
 
-            if(options.viewport.width < 160){
+            if(options.viewport.width < 160 || options.viewport.height < 100){
                 this.hideAll();
             }
             else{
                 this.showAll();
             }
-
 
             let selectionManager = this.selectionManager;
             let host = this.host;

@@ -14333,6 +14333,8 @@ var powerbi;
             (function (hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1) {
                 "use strict";
                 var DataRoleHelper = powerbi.extensibility.utils.dataview.DataRoleHelper;
+                //powerbi.extensibility.utils.formatting
+                var ValueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
                 ;
                 function visualTransform(options, host) {
                     var dataViews = options.dataViews;
@@ -14364,6 +14366,28 @@ var powerbi;
                     var valueColumnName = measureIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["measure"]; })[0].displayName;
                     //console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
                     var sDataPoints = [];
+                    var valueFormatterForCategories;
+                    var valueFormatterForX;
+                    var valueFormatterForY;
+                    var valueFormatterForMeasure;
+                    if (xIndex != -1) {
+                        valueFormatterForX = ValueFormatter.create({
+                            format: ValueFormatter.getFormatStringByColumn(metadata.columns[xIndex]),
+                            value: categorical.values[xIndex]
+                        });
+                    }
+                    if (yIndex != -1) {
+                        valueFormatterForY = ValueFormatter.create({
+                            format: ValueFormatter.getFormatStringByColumn(metadata.columns[yIndex]),
+                            value: categorical.values[yIndex]
+                        });
+                    }
+                    if (measureIndex != -1) {
+                        valueFormatterForMeasure = ValueFormatter.create({
+                            format: ValueFormatter.getFormatStringByColumn(metadata.columns[measureIndex]),
+                            value: categorical.values[measureIndex]
+                        });
+                    }
                     for (var i = 0, len = category.values.length; i < len; i++) {
                         var cat = categorical.categories[0].values[i];
                         //validate x
@@ -14383,19 +14407,20 @@ var powerbi;
                             measureValue: measureCheck,
                             tooltips: [{
                                     displayName: categoryColumnName,
-                                    value: cat != null ? cat.toString() : "(BLANK)" //,
+                                    value: cat != null ? cat.toString() : "(BLANK)",
+                                    header: "Point Values"
                                 },
                                 {
                                     displayName: xColumnName,
-                                    value: xCheck != null ? xCheck.toString() : ""
+                                    value: xCheck != null ? valueFormatterForX.format(xCheck).toString() : ""
                                 },
                                 {
                                     displayName: yColumnName,
-                                    value: yCheck != null ? yCheck.toString() : ""
+                                    value: yCheck != null ? valueFormatterForY.format(yCheck).toString() : ""
                                 },
                                 {
                                     displayName: valueColumnName,
-                                    value: measureCheck != null ? measureCheck.toString() : ""
+                                    value: measureCheck != null ? valueFormatterForMeasure.format(measureCheck).toString() : ""
                                 }],
                             selectionId: host.createSelectionIdBuilder().withCategory(category, i).createSelectionId()
                         });
@@ -14417,7 +14442,7 @@ var powerbi;
                     Visual.prototype.update = function (options) {
                         this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
                         //console.log('Visual update', options);
-                        if (options.viewport.width < 160) {
+                        if (options.viewport.width < 160 || options.viewport.height < 100) {
                             this.hideAll();
                         }
                         else {
