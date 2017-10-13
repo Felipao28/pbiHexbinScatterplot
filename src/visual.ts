@@ -234,6 +234,7 @@ module powerbi.extensibility.visual {
             let optionShowBins = this.settings.dataPoint.showHexbins;
             let optionShowBinLabels = this.settings.dataPoint.showHexbinLabels;
             let optionDotColor = this.settings.dataPoint.dotColor;
+            let optionDotSize = this.settings.dataPoint.dotSize;
             let optionShowDots = this.settings.dataPoint.showDots;
             let optionShowXAxis = this.settings.axes.showXAxis;
             let optionShowYAxis = this.settings.axes.showYAxis;
@@ -462,7 +463,7 @@ module powerbi.extensibility.visual {
                             else if(d.yValue == null){return "translate(0," + height + ")";}
                             else{return "translate(0,0)";}
                         })
-                        .attr('r', 4)
+                        .attr('r', optionDotSize)
                         .style('fill', function(d) {return d.measureValue != null ? colorMeasureScale(d.measureValue) : optionDotColor; })
                         .style('border-radius', 1)
                         .style('stroke', '#444444');
@@ -470,7 +471,7 @@ module powerbi.extensibility.visual {
                     dots.transition()
                         .attr("cx", function(d) {return xScale(d.xValue); })
                         .attr("cy", function(d) {return yScale(d.yValue); })
-                        .attr('r', 4)
+                        .attr('r', optionDotSize)
                         .style('fill', function(d) {return d.measureValue != null ? colorMeasureScale(d.measureValue) : optionDotColor; })
                         .duration(2000);
 
@@ -509,7 +510,7 @@ module powerbi.extensibility.visual {
         
                     dots.on('mouseout', function(d) {
                         d3.select(this).attr({
-                            'r': 4,
+                            'r': optionDotSize,
                         });
 
                         host.tooltipService.hide({

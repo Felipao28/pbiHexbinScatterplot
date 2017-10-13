@@ -41,9 +41,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
       public binOutline: string = "#FFFFFF";
       public showDots: boolean = true;
       public dotColor: string = "#374649";
-      
-      //public fillRule: string = "";
-      //public fontSize: number = 12;
+      public dotSize: string = "4";
     }
 
     export class axesSettings {

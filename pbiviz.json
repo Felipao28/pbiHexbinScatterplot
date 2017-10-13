@@ -1,6 +1,6 @@
 {
   "visual": {
-    "name": "hexbinScatter",
+    "name": "hexbinScatterplot",
     "displayName": "Hexbin Scatterplot",
     "guid": "hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1",
     "visualClassName": "Visual",

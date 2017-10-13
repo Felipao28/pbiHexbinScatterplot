@@ -79,6 +79,17 @@
                         }
                     }
                 },
+                "dotSize": {
+                    "displayName": "Point size",
+                    "type": {
+                        "enumeration": [
+                            {"value": "2", "displayName": "2"},
+                            {"value": "3", "displayName": "3"},
+                            {"value": "4", "displayName": "4"},
+                            {"value": "5", "displayName": "5"}
+                        ]
+                    }
+                },
                 "showDots": {
                     "displayName": "Show points",
                     "type": {

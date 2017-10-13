@@ -14281,8 +14281,7 @@ var powerbi;
                         this.binOutline = "#FFFFFF";
                         this.showDots = true;
                         this.dotColor = "#374649";
-                        //public fillRule: string = "";
-                        //public fontSize: number = 12;
+                        this.dotSize = "4";
                     }
                     return dataPointSettings;
                 }());
@@ -14474,6 +14473,7 @@ var powerbi;
                         var optionShowBins = this.settings.dataPoint.showHexbins;
                         var optionShowBinLabels = this.settings.dataPoint.showHexbinLabels;
                         var optionDotColor = this.settings.dataPoint.dotColor;
+                        var optionDotSize = this.settings.dataPoint.dotSize;
                         var optionShowDots = this.settings.dataPoint.showDots;
                         var optionShowXAxis = this.settings.axes.showXAxis;
                         var optionShowYAxis = this.settings.axes.showYAxis;
@@ -14671,14 +14671,14 @@ var powerbi;
                                         return "translate(0,0)";
                                     }
                                 })
-                                    .attr('r', 4)
+                                    .attr('r', optionDotSize)
                                     .style('fill', function (d) { return d.measureValue != null ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
                                     .style('border-radius', 1)
                                     .style('stroke', '#444444');
                                 dots_1.transition()
                                     .attr("cx", function (d) { return xScale(d.xValue); })
                                     .attr("cy", function (d) { return yScale(d.yValue); })
-                                    .attr('r', 4)
+                                    .attr('r', optionDotSize)
                                     .style('fill', function (d) { return d.measureValue != null ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
                                     .duration(2000);
                                 dots_1.exit().remove();
@@ -14710,7 +14710,7 @@ var powerbi;
                                 });
                                 dots_1.on('mouseout', function (d) {
                                     d3.select(this).attr({
-                                        'r': 4,
+                                        'r': optionDotSize,
                                     });
                                     host.tooltipService.hide({
                                         immediately: true,
