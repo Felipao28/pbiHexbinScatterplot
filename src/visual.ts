@@ -250,7 +250,7 @@ module powerbi.extensibility.visual {
             let yTicks = axisHelper.getRecommendedNumberOfTicksForYAxis(height);
 
             let xScale = d3.scale.linear()
-                .domain([0, xRange[1]])
+                .domain([xRange[0], xRange[1]])
                 .range([margin.left, width + margin.left - margin.right]);            
 
             let xAxis = d3.svg.axis()
@@ -259,7 +259,7 @@ module powerbi.extensibility.visual {
                 .orient("bottom");
             
             let yScale = d3.scale.linear()
-                .domain([0, yRange[1]])
+                .domain([yRange[0], yRange[1]])
                 .range([height, margin.top]);
 
             let yAxis = d3.svg.axis()
@@ -278,118 +278,210 @@ module powerbi.extensibility.visual {
 
             let svg = this.svg;
 
-            svg.selectAll(".axis").remove();
-
             svg
                 .attr("width", options.viewport.width)
                 .attr("height", options.viewport.height);
 
-            svg.select("#clip").remove();
-            svg.select(".hexagons").remove();
-            svg.select(".hexbinLabels").remove();
-            svg.select(".dots").remove();
-            svg.select(".x-axis-label").remove();
-            svg.select(".y-axis-label").remove();
+            try{
+                svg.select("#clip").remove();
+                svg.select(".hexagons").remove();
+                svg.select(".hexbinLabels").remove();
+                svg.select(".dots").remove();
+                svg.selectAll(".axis").remove();
+                svg.select(".x-axis-label").remove();
+                svg.select(".y-axis-label").remove();
 
-            let g = this.g;
+                let g = this.g;
 
-            let clip = g.append("clipPath")
-                .attr("id", "clip")
-                .append("rect")
-                    .attr("class", "clip-rect")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr("transform", "translate(" + margin.left + ",0)");
+                let clip = g.append("clipPath")
+                    .attr("id", "clip")
+                    .append("rect")
+                        .attr("class", "clip-rect")
+                        .attr("width", width > 0 ? width : 0)
+                        .attr("height", height > 0 ? height : 0)
+                        .attr("transform", "translate(" + margin.left + ",0)");
 
-            let hexagonGroup = g.append("g")
-                .attr("class", "hexagons")
-                .attr("clip-path", "url(#clip)");
+                let hexagonGroup = g.append("g")
+                    .attr("class", "hexagons")
+                    .attr("clip-path", "url(#clip)");
 
-            let hexagonLabels = g.append("g")
-                .attr("class", "hexbinLabels");
+                let hexagonLabels = g.append("g")
+                    .attr("class", "hexbinLabels");
 
-            //Axes - over hexagons but under dots
-            if(optionShowXAxis){
-                g.append("g")
-                    .attr("class", "axis")
-                    .attr("transform", "translate(0, " + height + ")")
-                    .call(xAxis);
+                //Axes - over hexagons but under dots
+                if(optionShowXAxis){
+                    g.append("g")
+                        .attr("class", "axis")
+                        .attr("transform", "translate(0, " + height + ")")
+                        .call(xAxis);
 
-                svg.append("text")
-                    .attr("class", "x-axis-label")
-                    .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
-                    .style("text-anchor", "middle")
-                    .text(viewModel.scatterMetaData[0].xAxisLabel);
-            }
+                    svg.append("text")
+                        .attr("class", "x-axis-label")
+                        .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
+                        .style("text-anchor", "middle")
+                        .text(viewModel.scatterMetaData[0].xAxisLabel);
+                }
 
-            if(optionShowYAxis){
-                g.append("g")
-                    .attr("class", "axis")
-                    .attr("transform", "translate(" + margin.left + ", 0)")
-                    .call(yAxis);
+                if(optionShowYAxis){
+                    g.append("g")
+                        .attr("class", "axis")
+                        .attr("transform", "translate(" + margin.left + ", 0)")
+                        .call(yAxis);
 
-                svg.append("text")
-                    .attr("class", "y-axis-label")
-                    .attr("transform", "rotate(-90)")
-                    .attr("y", 5)
-                    .attr("x",0 - (height / 2))
-                    .attr("dy", "1em")
-                    .style("text-anchor", "middle")
-                    .text(viewModel.scatterMetaData[0].yAxisLabel);
-            }
-            
-            let dotGroup = g.append("g")
-                .attr("class", "dots")
-
-            //Hexagons
-            if(optionShowBins){
-                let hexagonData = hexbin(data.map(function(d){return [xScale(d.xValue), yScale(d.yValue)]}));
-
-                let hexagons = hexagonGroup.selectAll(".hexagon")
-                    .data(hexagonData);
-
-                //console.log("hexagonData: ", hexagonData);
-
-                let maxDotsInBin = d3.max(hexagonData.map(function(d){return d.length;}));
-                //console.log("maxDotsInBin", maxDotsInBin);
-
-                let colorNoMeasureScale = d3.scale.linear()
-                    .domain([0, maxDotsInBin])
-                    .range(["#DDDDDD", optionBinColor])
-                    .interpolate(d3.interpolateLab);
-
-                hexagons.enter().append("path")
-                    .attr("class", "hexagon")
-                    .attr("d", hexbin.hexagon())
-                    .attr("transform", function(d) { return "translate(" + (d as any).x + "," + (d as any).y + ")"; })
-                    .style("fill", function(d) { return colorNoMeasureScale((d as any).length); })
-                    .style("stroke", optionBinOutline);
-
-                hexagons.transition()
-                    .attr("transform", function(d) { return "translate(" + (d as any).x + "," + (d as any).y + ")"; })
-                    .style("fill", function(d) { return colorNoMeasureScale((d as any).length); })
-                    .style("stroke", optionBinOutline)
-                    .duration(1000);
+                    svg.append("text")
+                        .attr("class", "y-axis-label")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", 5)
+                        .attr("x",0 - (height / 2))
+                        .attr("dy", "1em")
+                        .style("text-anchor", "middle")
+                        .text(viewModel.scatterMetaData[0].yAxisLabel);
+                }
                 
-                hexagons.exit().remove();
+                let dotGroup = g.append("g")
+                    .attr("class", "dots")
 
-                if(optionShowBinLabels){
-                    hexagons.on('mouseover', function(d) {
+                //Hexagons
+                if(optionShowBins){
+                    let hexagonData = hexbin(data.map(function(d){return [xScale(d.xValue), yScale(d.yValue)]}));
+
+                    let hexagons = hexagonGroup.selectAll(".hexagon")
+                        .data(hexagonData);
+
+                    //console.log("hexagonData: ", hexagonData);
+
+                    let maxDotsInBin = d3.max(hexagonData.map(function(d){return d.length;}));
+                    //console.log("maxDotsInBin", maxDotsInBin);
+
+                    let colorNoMeasureScale = d3.scale.linear()
+                        .domain([0, maxDotsInBin])
+                        .range(["#DDDDDD", optionBinColor])
+                        .interpolate(d3.interpolateLab);
+
+                    hexagons.enter().append("path")
+                        .attr("class", "hexagon")
+                        .attr("d", hexbin.hexagon())
+                        .attr("transform", function(d) { return "translate(" + (d as any).x + "," + (d as any).y + ")"; })
+                        .style("fill", function(d) { return colorNoMeasureScale((d as any).length); })
+                        .style("stroke", optionBinOutline);
+
+                    hexagons.transition()
+                        .attr("transform", function(d) { return "translate(" + (d as any).x + "," + (d as any).y + ")"; })
+                        .style("fill", function(d) { return colorNoMeasureScale((d as any).length); })
+                        .style("stroke", optionBinOutline)
+                        .duration(1000);
+                    
+                    hexagons.exit().remove();
+
+                    if(optionShowBinLabels){
+                        hexagons.on('mouseover', function(d) {
+                            let mouse = d3.mouse(svg.node());
+                            let x = mouse[0];
+                            let y = mouse[1];
+
+                            host.tooltipService.show({
+                                dataItems: [
+                                    {displayName: "Density", value: (d as any).length.toString(), header: "Bin Stats" }
+                                ],
+                                identities: [],
+                                coordinates: [x, y],
+                                isTouchEvent: false
+                            });
+                        });
+
+                        hexagons.on('mouseout', function(d) {
+                            d3.select(this).attr({
+                                'r': 4,
+                            });
+
+                            host.tooltipService.hide({
+                                immediately: true,
+                                isTouchEvent: false
+                            });
+                        });
+            
+                        hexagons.on("mousemove", (d) => {
+                            let mouse = d3.mouse(svg.node());
+                            let x = mouse[0];
+                            let y = mouse[1];
+            
+                            host.tooltipService.move({
+                                dataItems: [
+                                    {displayName: "Density", value: (d as any).length.toString(), header: "Bin Stats"}
+                                ],
+                                identities: [],
+                                coordinates: [x, y],
+                                isTouchEvent: false
+                            });
+                        });
+                    }
+                }
+
+                //Dots
+                if(optionShowDots){
+                    let dots = dotGroup.selectAll('circle')
+                        .data(data);
+
+                    let colorMeasureScale = d3.scale.linear()
+                        .domain([measureRange[0], measureRange[1]])
+                        .range(["#DDDDDD", optionDotColor])
+                        .interpolate(d3.interpolateLab);
+
+                    dots.enter().append('circle')
+                        .attr("cx", function(d) {return xScale(d.xValue); })
+                        .attr("cy", function(d) {return yScale(d.yValue); })
+                        .attr("transform", function(d) { 
+                            if(d.xValue == null && d.yValue == null){return "translate(" + margin.left + "," + (height - margin.top) + ")";}
+                            else if(d.xValue == null){return "translate(" + margin.left + ",0)";}
+                            else if(d.yValue == null){return "translate(0," + height + ")";}
+                            else{return "translate(0,0)";}
+                        })
+                        .attr('r', 4)
+                        .style('fill', function(d) {return d.measureValue != null ? colorMeasureScale(d.measureValue) : optionDotColor; })
+                        .style('border-radius', 1)
+                        .style('stroke', '#444444');
+                    
+                    dots.transition()
+                        .attr("cx", function(d) {return xScale(d.xValue); })
+                        .attr("cy", function(d) {return yScale(d.yValue); })
+                        .attr('r', 4)
+                        .style('fill', function(d) {return d.measureValue != null ? colorMeasureScale(d.measureValue) : optionDotColor; })
+                        .duration(2000);
+
+                    dots.exit().remove();
+
+                    dots.on('click', function(d) {
+                        selectionManager.select(d.selectionId).then((ids: ISelectionId[]) => {
+                            dots.attr({
+                                'opacity': ids.length > 0 ? 0.2 : 1,
+                            });
+                    
+                            d3.select(this).attr({
+                                'opacity': 1,
+                            });
+                        });
+                    
+                        (<Event>d3.event).stopPropagation();
+                    });
+        
+                    dots.on('mouseover', function(d) {
                         let mouse = d3.mouse(svg.node());
                         let x = mouse[0];
                         let y = mouse[1];
 
+                        d3.select(this).attr({
+                            'r': 8,
+                        });
+        
                         host.tooltipService.show({
-                            dataItems: [
-                                {displayName: "Density", value: (d as any).length.toString(), header: "Bin Stats" }
-                            ],
-                            identities: [],
+                            dataItems: d.tooltips,
+                            identities: [d.selectionId],
                             coordinates: [x, y],
                             isTouchEvent: false
                         });
                     });
-
-                    hexagons.on('mouseout', function(d) {
+        
+                    dots.on('mouseout', function(d) {
                         d3.select(this).attr({
                             'r': 4,
                         });
@@ -400,110 +492,22 @@ module powerbi.extensibility.visual {
                         });
                     });
         
-                    hexagons.on("mousemove", (d) => {
+                    dots.on("mousemove", (d) => {
                         let mouse = d3.mouse(svg.node());
                         let x = mouse[0];
                         let y = mouse[1];
         
                         host.tooltipService.move({
-                            dataItems: [
-                                {displayName: "Density", value: (d as any).length.toString(), header: "Bin Stats"}
-                            ],
-                            identities: [],
+                            dataItems: d.tooltips,
+                            identities: [d.selectionId],
                             coordinates: [x, y],
                             isTouchEvent: false
                         });
                     });
                 }
             }
-
-            //Dots
-            if(optionShowDots){
-                let dots = dotGroup.selectAll('circle')
-                    .data(data);
-
-                let colorMeasureScale = d3.scale.linear()
-                    .domain([measureRange[0], measureRange[1]])
-                    .range(["#DDDDDD", optionDotColor])
-                    .interpolate(d3.interpolateLab);
-
-                dots.enter().append('circle')
-                    .attr("cx", function(d) {return xScale(d.xValue); })
-                    .attr("cy", function(d) {return yScale(d.yValue); })
-                    .attr("transform", function(d) { 
-                        if(d.xValue == null && d.yValue == null){return "translate(" + margin.left + "," + (height - margin.top) + ")";}
-                        else if(d.xValue == null){return "translate(" + margin.left + ",0)";}
-                        else if(d.yValue == null){return "translate(0," + height + ")";}
-                        else{return "translate(0,0)";}
-                    })
-                    .attr('r', 4)
-                    .style('fill', function(d) {return d.measureValue != null ? colorMeasureScale(d.measureValue) : optionDotColor; })
-                    .style('border-radius', 1)
-                    .style('stroke', '#444444');
-                
-                dots.transition()
-                    .attr("cx", function(d) {return xScale(d.xValue); })
-                    .attr("cy", function(d) {return yScale(d.yValue); })
-                    .attr('r', 4)
-                    .style('fill', function(d) {return d.measureValue != null ? colorMeasureScale(d.measureValue) : optionDotColor; })
-                    .duration(2000);
-
-                dots.exit().remove();
-
-                dots.on('click', function(d) {
-                    selectionManager.select(d.selectionId).then((ids: ISelectionId[]) => {
-                        dots.attr({
-                            'opacity': ids.length > 0 ? 0.2 : 1,
-                        });
-                
-                        d3.select(this).attr({
-                            'opacity': 1,
-                        });
-                    });
-                
-                    (<Event>d3.event).stopPropagation();
-                });
-    
-                dots.on('mouseover', function(d) {
-                    let mouse = d3.mouse(svg.node());
-                    let x = mouse[0];
-                    let y = mouse[1];
-
-                    d3.select(this).attr({
-                        'r': 8,
-                    });
-    
-                    host.tooltipService.show({
-                        dataItems: d.tooltips,
-                        identities: [d.selectionId],
-                        coordinates: [x, y],
-                        isTouchEvent: false
-                    });
-                });
-    
-                dots.on('mouseout', function(d) {
-                    d3.select(this).attr({
-                        'r': 4,
-                    });
-
-                    host.tooltipService.hide({
-                        immediately: true,
-                        isTouchEvent: false
-                    });
-                });
-    
-                dots.on("mousemove", (d) => {
-                    let mouse = d3.mouse(svg.node());
-                    let x = mouse[0];
-                    let y = mouse[1];
-    
-                    host.tooltipService.move({
-                        dataItems: d.tooltips,
-                        identities: [d.selectionId],
-                        coordinates: [x, y],
-                        isTouchEvent: false
-                    });
-                });
+            catch(e){
+                console.log("Failed to render hexbin scatterplot", e);
             }
 
         }

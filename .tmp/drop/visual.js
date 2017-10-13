@@ -14483,14 +14483,14 @@ var powerbi;
                         var xTicks = axisHelper.getRecommendedNumberOfTicksForXAxis(width);
                         var yTicks = axisHelper.getRecommendedNumberOfTicksForYAxis(height);
                         var xScale = d3.scale.linear()
-                            .domain([0, xRange[1]])
+                            .domain([xRange[0], xRange[1]])
                             .range([margin.left, width + margin.left - margin.right]);
                         var xAxis = d3.svg.axis()
                             .scale(xScale)
                             .ticks(xTicks)
                             .orient("bottom");
                         var yScale = d3.scale.linear()
-                            .domain([0, yRange[1]])
+                            .domain([yRange[0], yRange[1]])
                             .range([height, margin.top]);
                         var yAxis = d3.svg.axis()
                             .scale(yScale)
@@ -14504,96 +14504,183 @@ var powerbi;
                         ;
                         //console.log(hexbin(points));
                         var svg = this.svg;
-                        svg.selectAll(".axis").remove();
                         svg
                             .attr("width", options.viewport.width)
                             .attr("height", options.viewport.height);
-                        svg.select("#clip").remove();
-                        svg.select(".hexagons").remove();
-                        svg.select(".hexbinLabels").remove();
-                        svg.select(".dots").remove();
-                        svg.select(".x-axis-label").remove();
-                        svg.select(".y-axis-label").remove();
-                        var g = this.g;
-                        var clip = g.append("clipPath")
-                            .attr("id", "clip")
-                            .append("rect")
-                            .attr("class", "clip-rect")
-                            .attr("width", width)
-                            .attr("height", height)
-                            .attr("transform", "translate(" + margin.left + ",0)");
-                        var hexagonGroup = g.append("g")
-                            .attr("class", "hexagons")
-                            .attr("clip-path", "url(#clip)");
-                        var hexagonLabels = g.append("g")
-                            .attr("class", "hexbinLabels");
-                        //Axes - over hexagons but under dots
-                        if (optionShowXAxis) {
-                            g.append("g")
-                                .attr("class", "axis")
-                                .attr("transform", "translate(0, " + height + ")")
-                                .call(xAxis);
-                            svg.append("text")
-                                .attr("class", "x-axis-label")
-                                .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
-                                .style("text-anchor", "middle")
-                                .text(viewModel.scatterMetaData[0].xAxisLabel);
-                        }
-                        if (optionShowYAxis) {
-                            g.append("g")
-                                .attr("class", "axis")
-                                .attr("transform", "translate(" + margin.left + ", 0)")
-                                .call(yAxis);
-                            svg.append("text")
-                                .attr("class", "y-axis-label")
-                                .attr("transform", "rotate(-90)")
-                                .attr("y", 5)
-                                .attr("x", 0 - (height / 2))
-                                .attr("dy", "1em")
-                                .style("text-anchor", "middle")
-                                .text(viewModel.scatterMetaData[0].yAxisLabel);
-                        }
-                        var dotGroup = g.append("g")
-                            .attr("class", "dots");
-                        //Hexagons
-                        if (optionShowBins) {
-                            var hexagonData = hexbin(data.map(function (d) { return [xScale(d.xValue), yScale(d.yValue)]; }));
-                            var hexagons = hexagonGroup.selectAll(".hexagon")
-                                .data(hexagonData);
-                            //console.log("hexagonData: ", hexagonData);
-                            var maxDotsInBin = d3.max(hexagonData.map(function (d) { return d.length; }));
-                            //console.log("maxDotsInBin", maxDotsInBin);
-                            var colorNoMeasureScale_1 = d3.scale.linear()
-                                .domain([0, maxDotsInBin])
-                                .range(["#DDDDDD", optionBinColor])
-                                .interpolate(d3.interpolateLab);
-                            hexagons.enter().append("path")
-                                .attr("class", "hexagon")
-                                .attr("d", hexbin.hexagon())
-                                .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
-                                .style("fill", function (d) { return colorNoMeasureScale_1(d.length); })
-                                .style("stroke", optionBinOutline);
-                            hexagons.transition()
-                                .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
-                                .style("fill", function (d) { return colorNoMeasureScale_1(d.length); })
-                                .style("stroke", optionBinOutline)
-                                .duration(1000);
-                            hexagons.exit().remove();
-                            if (optionShowBinLabels) {
-                                hexagons.on('mouseover', function (d) {
+                        try {
+                            svg.select("#clip").remove();
+                            svg.select(".hexagons").remove();
+                            svg.select(".hexbinLabels").remove();
+                            svg.select(".dots").remove();
+                            svg.selectAll(".axis").remove();
+                            svg.select(".x-axis-label").remove();
+                            svg.select(".y-axis-label").remove();
+                            var g = this.g;
+                            var clip = g.append("clipPath")
+                                .attr("id", "clip")
+                                .append("rect")
+                                .attr("class", "clip-rect")
+                                .attr("width", width > 0 ? width : 0)
+                                .attr("height", height > 0 ? height : 0)
+                                .attr("transform", "translate(" + margin.left + ",0)");
+                            var hexagonGroup = g.append("g")
+                                .attr("class", "hexagons")
+                                .attr("clip-path", "url(#clip)");
+                            var hexagonLabels = g.append("g")
+                                .attr("class", "hexbinLabels");
+                            //Axes - over hexagons but under dots
+                            if (optionShowXAxis) {
+                                g.append("g")
+                                    .attr("class", "axis")
+                                    .attr("transform", "translate(0, " + height + ")")
+                                    .call(xAxis);
+                                svg.append("text")
+                                    .attr("class", "x-axis-label")
+                                    .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.bottom) + ")")
+                                    .style("text-anchor", "middle")
+                                    .text(viewModel.scatterMetaData[0].xAxisLabel);
+                            }
+                            if (optionShowYAxis) {
+                                g.append("g")
+                                    .attr("class", "axis")
+                                    .attr("transform", "translate(" + margin.left + ", 0)")
+                                    .call(yAxis);
+                                svg.append("text")
+                                    .attr("class", "y-axis-label")
+                                    .attr("transform", "rotate(-90)")
+                                    .attr("y", 5)
+                                    .attr("x", 0 - (height / 2))
+                                    .attr("dy", "1em")
+                                    .style("text-anchor", "middle")
+                                    .text(viewModel.scatterMetaData[0].yAxisLabel);
+                            }
+                            var dotGroup = g.append("g")
+                                .attr("class", "dots");
+                            //Hexagons
+                            if (optionShowBins) {
+                                var hexagonData = hexbin(data.map(function (d) { return [xScale(d.xValue), yScale(d.yValue)]; }));
+                                var hexagons = hexagonGroup.selectAll(".hexagon")
+                                    .data(hexagonData);
+                                //console.log("hexagonData: ", hexagonData);
+                                var maxDotsInBin = d3.max(hexagonData.map(function (d) { return d.length; }));
+                                //console.log("maxDotsInBin", maxDotsInBin);
+                                var colorNoMeasureScale_1 = d3.scale.linear()
+                                    .domain([0, maxDotsInBin])
+                                    .range(["#DDDDDD", optionBinColor])
+                                    .interpolate(d3.interpolateLab);
+                                hexagons.enter().append("path")
+                                    .attr("class", "hexagon")
+                                    .attr("d", hexbin.hexagon())
+                                    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
+                                    .style("fill", function (d) { return colorNoMeasureScale_1(d.length); })
+                                    .style("stroke", optionBinOutline);
+                                hexagons.transition()
+                                    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
+                                    .style("fill", function (d) { return colorNoMeasureScale_1(d.length); })
+                                    .style("stroke", optionBinOutline)
+                                    .duration(1000);
+                                hexagons.exit().remove();
+                                if (optionShowBinLabels) {
+                                    hexagons.on('mouseover', function (d) {
+                                        var mouse = d3.mouse(svg.node());
+                                        var x = mouse[0];
+                                        var y = mouse[1];
+                                        host.tooltipService.show({
+                                            dataItems: [
+                                                { displayName: "Density", value: d.length.toString(), header: "Bin Stats" }
+                                            ],
+                                            identities: [],
+                                            coordinates: [x, y],
+                                            isTouchEvent: false
+                                        });
+                                    });
+                                    hexagons.on('mouseout', function (d) {
+                                        d3.select(this).attr({
+                                            'r': 4,
+                                        });
+                                        host.tooltipService.hide({
+                                            immediately: true,
+                                            isTouchEvent: false
+                                        });
+                                    });
+                                    hexagons.on("mousemove", function (d) {
+                                        var mouse = d3.mouse(svg.node());
+                                        var x = mouse[0];
+                                        var y = mouse[1];
+                                        host.tooltipService.move({
+                                            dataItems: [
+                                                { displayName: "Density", value: d.length.toString(), header: "Bin Stats" }
+                                            ],
+                                            identities: [],
+                                            coordinates: [x, y],
+                                            isTouchEvent: false
+                                        });
+                                    });
+                                }
+                            }
+                            //Dots
+                            if (optionShowDots) {
+                                var dots_1 = dotGroup.selectAll('circle')
+                                    .data(data);
+                                var colorMeasureScale_1 = d3.scale.linear()
+                                    .domain([measureRange[0], measureRange[1]])
+                                    .range(["#DDDDDD", optionDotColor])
+                                    .interpolate(d3.interpolateLab);
+                                dots_1.enter().append('circle')
+                                    .attr("cx", function (d) { return xScale(d.xValue); })
+                                    .attr("cy", function (d) { return yScale(d.yValue); })
+                                    .attr("transform", function (d) {
+                                    if (d.xValue == null && d.yValue == null) {
+                                        return "translate(" + margin.left + "," + (height - margin.top) + ")";
+                                    }
+                                    else if (d.xValue == null) {
+                                        return "translate(" + margin.left + ",0)";
+                                    }
+                                    else if (d.yValue == null) {
+                                        return "translate(0," + height + ")";
+                                    }
+                                    else {
+                                        return "translate(0,0)";
+                                    }
+                                })
+                                    .attr('r', 4)
+                                    .style('fill', function (d) { return d.measureValue != null ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
+                                    .style('border-radius', 1)
+                                    .style('stroke', '#444444');
+                                dots_1.transition()
+                                    .attr("cx", function (d) { return xScale(d.xValue); })
+                                    .attr("cy", function (d) { return yScale(d.yValue); })
+                                    .attr('r', 4)
+                                    .style('fill', function (d) { return d.measureValue != null ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
+                                    .duration(2000);
+                                dots_1.exit().remove();
+                                dots_1.on('click', function (d) {
+                                    var _this = this;
+                                    selectionManager.select(d.selectionId).then(function (ids) {
+                                        dots_1.attr({
+                                            'opacity': ids.length > 0 ? 0.2 : 1,
+                                        });
+                                        d3.select(_this).attr({
+                                            'opacity': 1,
+                                        });
+                                    });
+                                    d3.event.stopPropagation();
+                                });
+                                dots_1.on('mouseover', function (d) {
                                     var mouse = d3.mouse(svg.node());
                                     var x = mouse[0];
                                     var y = mouse[1];
+                                    d3.select(this).attr({
+                                        'r': 8,
+                                    });
                                     host.tooltipService.show({
-                                        dataItems: [
-                                            { displayName: "Density", value: d.length.toString(), header: "Bin Stats" }
-                                        ],
-                                        identities: [],
+                                        dataItems: d.tooltips,
+                                        identities: [d.selectionId],
                                         coordinates: [x, y],
                                         isTouchEvent: false
                                     });
                                 });
-                                hexagons.on('mouseout', function (d) {
+                                dots_1.on('mouseout', function (d) {
                                     d3.select(this).attr({
                                         'r': 4,
                                     });
@@ -14602,103 +14689,21 @@ var powerbi;
                                         isTouchEvent: false
                                     });
                                 });
-                                hexagons.on("mousemove", function (d) {
+                                dots_1.on("mousemove", function (d) {
                                     var mouse = d3.mouse(svg.node());
                                     var x = mouse[0];
                                     var y = mouse[1];
                                     host.tooltipService.move({
-                                        dataItems: [
-                                            { displayName: "Density", value: d.length.toString(), header: "Bin Stats" }
-                                        ],
-                                        identities: [],
+                                        dataItems: d.tooltips,
+                                        identities: [d.selectionId],
                                         coordinates: [x, y],
                                         isTouchEvent: false
                                     });
                                 });
                             }
                         }
-                        //Dots
-                        if (optionShowDots) {
-                            var dots_1 = dotGroup.selectAll('circle')
-                                .data(data);
-                            var colorMeasureScale_1 = d3.scale.linear()
-                                .domain([measureRange[0], measureRange[1]])
-                                .range(["#DDDDDD", optionDotColor])
-                                .interpolate(d3.interpolateLab);
-                            dots_1.enter().append('circle')
-                                .attr("cx", function (d) { return xScale(d.xValue); })
-                                .attr("cy", function (d) { return yScale(d.yValue); })
-                                .attr("transform", function (d) {
-                                if (d.xValue == null && d.yValue == null) {
-                                    return "translate(" + margin.left + "," + (height - margin.top) + ")";
-                                }
-                                else if (d.xValue == null) {
-                                    return "translate(" + margin.left + ",0)";
-                                }
-                                else if (d.yValue == null) {
-                                    return "translate(0," + height + ")";
-                                }
-                                else {
-                                    return "translate(0,0)";
-                                }
-                            })
-                                .attr('r', 4)
-                                .style('fill', function (d) { return d.measureValue != null ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
-                                .style('border-radius', 1)
-                                .style('stroke', '#444444');
-                            dots_1.transition()
-                                .attr("cx", function (d) { return xScale(d.xValue); })
-                                .attr("cy", function (d) { return yScale(d.yValue); })
-                                .attr('r', 4)
-                                .style('fill', function (d) { return d.measureValue != null ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
-                                .duration(2000);
-                            dots_1.exit().remove();
-                            dots_1.on('click', function (d) {
-                                var _this = this;
-                                selectionManager.select(d.selectionId).then(function (ids) {
-                                    dots_1.attr({
-                                        'opacity': ids.length > 0 ? 0.2 : 1,
-                                    });
-                                    d3.select(_this).attr({
-                                        'opacity': 1,
-                                    });
-                                });
-                                d3.event.stopPropagation();
-                            });
-                            dots_1.on('mouseover', function (d) {
-                                var mouse = d3.mouse(svg.node());
-                                var x = mouse[0];
-                                var y = mouse[1];
-                                d3.select(this).attr({
-                                    'r': 8,
-                                });
-                                host.tooltipService.show({
-                                    dataItems: d.tooltips,
-                                    identities: [d.selectionId],
-                                    coordinates: [x, y],
-                                    isTouchEvent: false
-                                });
-                            });
-                            dots_1.on('mouseout', function (d) {
-                                d3.select(this).attr({
-                                    'r': 4,
-                                });
-                                host.tooltipService.hide({
-                                    immediately: true,
-                                    isTouchEvent: false
-                                });
-                            });
-                            dots_1.on("mousemove", function (d) {
-                                var mouse = d3.mouse(svg.node());
-                                var x = mouse[0];
-                                var y = mouse[1];
-                                host.tooltipService.move({
-                                    dataItems: d.tooltips,
-                                    identities: [d.selectionId],
-                                    coordinates: [x, y],
-                                    isTouchEvent: false
-                                });
-                            });
+                        catch (e) {
+                            console.log("Failed to render hexbin scatterplot", e);
                         }
                     };
                     Visual.prototype.hideAll = function () {
