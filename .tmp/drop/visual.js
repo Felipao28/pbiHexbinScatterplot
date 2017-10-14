@@ -14336,14 +14336,13 @@ var powerbi;
             (function (hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1) {
                 "use strict";
                 var DataRoleHelper = powerbi.extensibility.utils.dataview.DataRoleHelper;
-                //powerbi.extensibility.utils.chartutils
+                // powerbi.extensibility.utils.chartutils
                 var axisHelper = powerbi.extensibility.utils.chart.axis;
-                //powerbi.extensibility.utils.formatting
+                // powerbi.extensibility.utils.formatting
                 var ValueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
-                ;
                 function visualTransform(options, host) {
                     var dataViews = options.dataViews;
-                    //console.log('visualTransform', dataViews);
+                    // console.log('visualTransform', dataViews);
                     var viewModel = {
                         scatterDataPoints: [],
                         scatterMetaData: []
@@ -14364,14 +14363,14 @@ var powerbi;
                     var xIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "xAxis");
                     var yIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "yAxis");
                     var measureIndex = DataRoleHelper.getMeasureIndexOfRole(grouped, "measure");
-                    //console.log(categoryIndex, xIndex, yIndex, measureIndex);
+                    // console.log(categoryIndex, xIndex, yIndex, measureIndex);
                     var metadata = dataViews[0].metadata;
                     var categoryColumnName = metadata.columns.filter(function (c) { return c.roles["category"]; })[0].displayName;
-                    var xColumnName = xIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["xAxis"]; })[0].displayName;
-                    var yColumnName = yIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["yAxis"]; })[0].displayName;
-                    var valueColumnName = measureIndex == -1 ? "" : metadata.columns.filter(function (c) { return c.roles["measure"]; })[0].displayName;
-                    //console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
-                    //console.log(metadata);
+                    var xColumnName = xIndex === -1 ? "" : metadata.columns.filter(function (c) { return c.roles["xAxis"]; })[0].displayName;
+                    var yColumnName = yIndex === -1 ? "" : metadata.columns.filter(function (c) { return c.roles["yAxis"]; })[0].displayName;
+                    var valueColumnName = measureIndex === -1 ? "" : metadata.columns.filter(function (c) { return c.roles["measure"]; })[0].displayName;
+                    // console.log(categoryColumnName, xColumnName, yColumnName, valueColumnName);
+                    // console.log(metadata);
                     var sDataPoints = [];
                     var sMetaData = [];
                     var valueFormatterForCategories;
@@ -14385,8 +14384,8 @@ var powerbi;
                         format: ValueFormatter.getFormatStringByColumn(metadata.columns.filter(function (c) { return c.roles["category"]; })[0]),
                         value: categorical.categories[categoryIndex]
                     });
-                    //validate X, nulls to 0
-                    if (xIndex != -1) {
+                    // validate X, nulls to 0
+                    if (xIndex !== -1) {
                         xValues = categorical.values[xIndex].values.map(function (x) {
                             if (x == null) {
                                 return 0;
@@ -14398,8 +14397,8 @@ var powerbi;
                             value: categorical.values[xIndex]
                         });
                     }
-                    //validate Y, nulls to 0
-                    if (yIndex != -1) {
+                    // validate Y, nulls to 0
+                    if (yIndex !== -1) {
                         yValues = categorical.values[yIndex].values.map(function (x) {
                             if (x == null) {
                                 return 0;
@@ -14411,8 +14410,8 @@ var powerbi;
                             value: categorical.values[yIndex]
                         });
                     }
-                    //validate Measure, nulls to 0
-                    if (measureIndex != -1) {
+                    // validate Measure, nulls to 0
+                    if (measureIndex !== -1) {
                         measureValues = categorical.values[measureIndex].values.map(function (x) {
                             if (x == null) {
                                 return 0;
@@ -14428,9 +14427,9 @@ var powerbi;
                         var cat = categorical.categories[0].values[i];
                         sDataPoints.push({
                             category: cat,
-                            xValue: xIndex == -1 ? 0 : xValues[i],
-                            yValue: yIndex == -1 ? 0 : yValues[i],
-                            measureValue: measureIndex == -1 ? 0 : measureValues[i],
+                            xValue: xIndex === -1 ? 0 : xValues[i],
+                            yValue: yIndex === -1 ? 0 : yValues[i],
+                            measureValue: measureIndex === -1 ? 0 : measureValues[i],
                             tooltips: [{
                                     displayName: categoryColumnName,
                                     value: cat != null ? valueFormatterForCategories.format(cat).toString() : "(BLANK)",
@@ -14438,15 +14437,15 @@ var powerbi;
                                 },
                                 {
                                     displayName: xColumnName,
-                                    value: xIndex == -1 ? "" : valueFormatterForX.format(xValues[i]).toString()
+                                    value: xIndex === -1 ? "" : valueFormatterForX.format(xValues[i]).toString()
                                 },
                                 {
                                     displayName: yColumnName,
-                                    value: yIndex == -1 ? "" : valueFormatterForY.format(yValues[i]).toString()
+                                    value: yIndex === -1 ? "" : valueFormatterForY.format(yValues[i]).toString()
                                 },
                                 {
                                     displayName: valueColumnName,
-                                    value: measureIndex == -1 ? "" : valueFormatterForMeasure.format(measureValues[i]).toString()
+                                    value: measureIndex === -1 ? "" : valueFormatterForMeasure.format(measureValues[i]).toString()
                                 }],
                             selectionId: host.createSelectionIdBuilder().withCategory(category, i).createSelectionId()
                         });
@@ -14463,7 +14462,7 @@ var powerbi;
                 }
                 var Visual = (function () {
                     function Visual(options) {
-                        //console.log('Visual constructor', options);
+                        // console.log('Visual constructor', options);
                         this.target = options.element;
                         this.host = options.host;
                         this.selectionManager = options.host.createSelectionManager();
@@ -14474,15 +14473,15 @@ var powerbi;
                             .attr("id", "clip")
                             .append("rect")
                             .attr("class", "clip-rect");
-                        //let hexagonGroup = this.hexagonGroup = g.append("g")
+                        // let hexagonGroup = this.hexagonGroup = g.append("g")
                         //    .attr("class", "hexagons")
                         //    .attr("clip-path", "url(#clip)");
-                        //let dotGroup = this.dotGroup = g.append("g")
+                        // let dotGroup = this.dotGroup = g.append("g")
                         //    .attr("class", "dots");
                     }
                     Visual.prototype.update = function (options) {
                         this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
-                        //console.log('Visual update', options);
+                        // console.log('Visual update', options);
                         if (options.viewport.width < 160 || options.viewport.height < 100) {
                             this.hideAll();
                         }
@@ -14505,7 +14504,7 @@ var powerbi;
                         var optionShowYTitle = this.settings.axes.showYTitle;
                         var optionOriginZeroZero = this.settings.axes.originZeroZero;
                         var viewModel = visualTransform(options, this.host);
-                        //console.log('ViewModel', viewModel);
+                        // console.log('ViewModel', viewModel);
                         var margin = {
                             left: optionShowYAxis ? 100 : 25,
                             right: 10,
@@ -14518,12 +14517,12 @@ var powerbi;
                         var xRange = d3.extent(data, function (d) { return d.xValue; });
                         var yRange = d3.extent(data, function (d) { return d.yValue; });
                         var measureRange = d3.extent(data, function (d) { return d.measureValue; });
-                        //console.log("xRange: ", xRange);
-                        //console.log("yRange: ", yRange);
-                        //console.log("measureRange: ", measureRange);
+                        // console.log("xRange: ", xRange);
+                        // console.log("yRange: ", yRange);
+                        // console.log("measureRange: ", measureRange);
                         var xTicks = axisHelper.getRecommendedNumberOfTicksForXAxis(width);
                         var yTicks = axisHelper.getRecommendedNumberOfTicksForYAxis(height);
-                        var xTickFormat = d3.format(".2s"); //.1f
+                        var xTickFormat = d3.format(".2s"); // .1f
                         var yTickFormat = d3.format(".2s");
                         if (options.viewport.width < 240) {
                             xTickFormat = "...";
@@ -14544,13 +14543,12 @@ var powerbi;
                             .ticks(yTicks)
                             .tickFormat(yTickFormat)
                             .orient("left");
-                        //console.log(points);
+                        // console.log(points);
                         var hexbin = d3.hexbin()
                             .size([width, height])
                             .radius(optionBinRadius)
                             .extent([[0, 0], [width, height]]);
-                        ;
-                        //console.log(hexbin(points));
+                        // console.log(hexbin(points));
                         var svg = this.svg;
                         svg
                             .attr("width", options.viewport.width)
@@ -14568,7 +14566,7 @@ var powerbi;
                                 .attr("width", width > 0 ? width : 0)
                                 .attr("height", height > 0 ? height : 0)
                                 .attr("transform", "translate(" + margin.left + ",0)");
-                            //let hexagonGroup = this.hexagonGroup;
+                            // let hexagonGroup = this.hexagonGroup;
                             var hexagonGroup = g.append("g")
                                 .attr("class", "hexagons")
                                 .attr("clip-path", "url(#clip)");
@@ -14580,7 +14578,7 @@ var powerbi;
                             }
                             var hexagonLabels = g.append("g")
                                 .attr("class", "hexbinLabels");
-                            //Axes - over hexagons but under dots
+                            // Axes - over hexagons but under dots
                             if (optionShowXAxis) {
                                 g.append("g")
                                     .attr("class", "axis")
@@ -14610,7 +14608,7 @@ var powerbi;
                                     .style("text-anchor", "middle")
                                     .text(viewModel.scatterMetaData[0].yAxisLabel);
                             }
-                            //let dotGroup = this.dotGroup;
+                            // let dotGroup = this.dotGroup;
                             var dotGroup = g.append("g")
                                 .attr("class", "dots");
                             if (!optionShowDots) {
@@ -14619,14 +14617,14 @@ var powerbi;
                             else {
                                 dotGroup.attr("visibility", "visible");
                             }
-                            //Hexagons
+                            // Hexagons
                             if (optionShowBins) {
                                 var hexagonData = hexbin(data.map(function (d) { return [xScale(d.xValue), yScale(d.yValue)]; }));
                                 var hexagons = hexagonGroup.selectAll(".hexagon")
                                     .data(hexagonData);
-                                //console.log("hexagonData: ", hexagonData);
+                                // console.log("hexagonData: ", hexagonData);
                                 var maxDotsInBin = d3.max(hexagonData.map(function (d) { return d.length; }));
-                                //console.log("maxDotsInBin", maxDotsInBin);
+                                // console.log("maxDotsInBin", maxDotsInBin);
                                 var colorNoMeasureScale_1 = d3.scale.linear()
                                     .domain([0, maxDotsInBin])
                                     .range(["#DDDDDD", optionBinColor])
@@ -14681,7 +14679,7 @@ var powerbi;
                                     });
                                 }
                             }
-                            //Dots
+                            // Dots
                             if (optionShowDots) {
                                 var dots_1 = dotGroup.selectAll('circle')
                                     .data(data);
