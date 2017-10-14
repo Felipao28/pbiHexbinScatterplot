@@ -14470,6 +14470,15 @@ var powerbi;
                         var svg = this.svg = d3.select(this.target).append("svg")
                             .attr("class", "container");
                         var g = this.g = svg.append("g");
+                        var clip = this.clip = g.append("clipPath")
+                            .attr("id", "clip")
+                            .append("rect")
+                            .attr("class", "clip-rect");
+                        var hexagonGroup = this.hexagonGroup = g.append("g")
+                            .attr("class", "hexagons")
+                            .attr("clip-path", "url(#clip)");
+                        var dotGroup = this.dotGroup = g.append("g")
+                            .attr("class", "dots");
                     }
                     Visual.prototype.update = function (options) {
                         this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
@@ -14547,24 +14556,23 @@ var powerbi;
                             .attr("width", options.viewport.width)
                             .attr("height", options.viewport.height);
                         try {
-                            svg.select("#clip").remove();
-                            svg.select(".hexagons").remove();
                             svg.select(".hexbinLabels").remove();
-                            svg.select(".dots").remove();
                             svg.selectAll(".axis").remove();
                             svg.select(".x-axis-label").remove();
                             svg.select(".y-axis-label").remove();
                             var g = this.g;
-                            var clip = g.append("clipPath")
-                                .attr("id", "clip")
-                                .append("rect")
-                                .attr("class", "clip-rect")
+                            var clip = this.clip;
+                            clip
                                 .attr("width", width > 0 ? width : 0)
                                 .attr("height", height > 0 ? height : 0)
                                 .attr("transform", "translate(" + margin.left + ",0)");
-                            var hexagonGroup = g.append("g")
-                                .attr("class", "hexagons")
-                                .attr("clip-path", "url(#clip)");
+                            var hexagonGroup = this.hexagonGroup;
+                            if (!optionShowBins) {
+                                hexagonGroup.attr("visibility", "hidden");
+                            }
+                            else {
+                                hexagonGroup.attr("visibility", "visible");
+                            }
                             var hexagonLabels = g.append("g")
                                 .attr("class", "hexbinLabels");
                             //Axes - over hexagons but under dots
@@ -14597,8 +14605,13 @@ var powerbi;
                                     .style("text-anchor", "middle")
                                     .text(viewModel.scatterMetaData[0].yAxisLabel);
                             }
-                            var dotGroup = g.append("g")
-                                .attr("class", "dots");
+                            var dotGroup = this.dotGroup;
+                            if (!optionShowDots) {
+                                dotGroup.attr("visibility", "hidden");
+                            }
+                            else {
+                                dotGroup.attr("visibility", "visible");
+                            }
                             //Hexagons
                             if (optionShowBins) {
                                 var hexagonData = hexbin(data.map(function (d) { return [xScale(d.xValue), yScale(d.yValue)]; }));
@@ -14695,7 +14708,7 @@ var powerbi;
                                     .attr("cy", function (d) { return yScale(d.yValue); })
                                     .attr('r', optionDotSize)
                                     .style('fill', function (d) { return viewModel.scatterMetaData[0].measureIndex > -1 ? colorMeasureScale_1(d.measureValue) : optionDotColor; })
-                                    .duration(2000);
+                                    .duration(1500);
                                 dots_1.exit().remove();
                                 dots_1.on('click', function (d) {
                                     var _this = this;
@@ -14779,11 +14792,11 @@ var powerbi;
     (function (visuals) {
         var plugins;
         (function (plugins) {
-            plugins.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG = {
-                name: 'hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1_DEBUG',
+            plugins.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1 = {
+                name: 'hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1',
                 displayName: 'Hexbin Scatterplot',
                 class: 'Visual',
-                version: '1.1.0',
+                version: '1.1.0.0',
                 apiVersion: '1.7.0',
                 create: function (options) { return new powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1.Visual(options); },
                 custom: true

@@ -214,6 +214,9 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
         private settings: VisualSettings;
         private svg: d3.Selection<SVGAElement>;
         private g: d3.Selection<SVGAElement>;
+        private clip: d3.Selection<SVGAElement>;
+        private hexagonGroup: d3.Selection<SVGAElement>;
+        private dotGroup: d3.Selection<SVGAElement>;
         private selectionManager: ISelectionManager;
 
         constructor(options: VisualConstructorOptions) {
@@ -226,6 +229,18 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                 .attr("class", "container");
             
             let g = this.g = svg.append("g");
+
+            let clip = this.clip = g.append("clipPath")
+                .attr("id", "clip")
+                .append("rect")
+                    .attr("class", "clip-rect");
+
+            let hexagonGroup = this.hexagonGroup = g.append("g")
+                .attr("class", "hexagons")
+                .attr("clip-path", "url(#clip)");
+
+            let dotGroup = this.dotGroup = g.append("g")
+                .attr("class", "dots");
 
         }
 
@@ -321,27 +336,26 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                 .attr("height", options.viewport.height);
 
             try{
-                svg.select("#clip").remove();
-                svg.select(".hexagons").remove();
                 svg.select(".hexbinLabels").remove();
-                svg.select(".dots").remove();
                 svg.selectAll(".axis").remove();
                 svg.select(".x-axis-label").remove();
                 svg.select(".y-axis-label").remove();
 
                 let g = this.g;
+                let clip = this.clip;
 
-                let clip = g.append("clipPath")
-                    .attr("id", "clip")
-                    .append("rect")
-                        .attr("class", "clip-rect")
-                        .attr("width", width > 0 ? width : 0)
-                        .attr("height", height > 0 ? height : 0)
-                        .attr("transform", "translate(" + margin.left + ",0)");
+                clip
+                    .attr("width", width > 0 ? width : 0)
+                    .attr("height", height > 0 ? height : 0)
+                    .attr("transform", "translate(" + margin.left + ",0)");
 
-                let hexagonGroup = g.append("g")
-                    .attr("class", "hexagons")
-                    .attr("clip-path", "url(#clip)");
+                let hexagonGroup = this.hexagonGroup;
+                if(!optionShowBins){
+                    hexagonGroup.attr("visibility", "hidden");
+                }
+                else{
+                    hexagonGroup.attr("visibility", "visible");
+                }
 
                 let hexagonLabels = g.append("g")
                     .attr("class", "hexbinLabels");
@@ -380,8 +394,13 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                         .text(viewModel.scatterMetaData[0].yAxisLabel);
                 }
                 
-                let dotGroup = g.append("g")
-                    .attr("class", "dots")
+                let dotGroup = this.dotGroup;
+                if(!optionShowDots){
+                    dotGroup.attr("visibility", "hidden");
+                }
+                else{
+                    dotGroup.attr("visibility", "visible");
+                }
 
                 //Hexagons
                 if(optionShowBins){
@@ -488,7 +507,7 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                         .attr("cy", function(d) {return yScale(d.yValue); })
                         .attr('r', optionDotSize)
                         .style('fill', function(d) {return viewModel.scatterMetaData[0].measureIndex > -1 ? colorMeasureScale(d.measureValue) : optionDotColor; })
-                        .duration(2000);
+                        .duration(1500);
 
                     dots.exit().remove();
 
