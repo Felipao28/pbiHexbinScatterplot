@@ -14474,11 +14474,11 @@ var powerbi;
                             .attr("id", "clip")
                             .append("rect")
                             .attr("class", "clip-rect");
-                        var hexagonGroup = this.hexagonGroup = g.append("g")
-                            .attr("class", "hexagons")
-                            .attr("clip-path", "url(#clip)");
-                        var dotGroup = this.dotGroup = g.append("g")
-                            .attr("class", "dots");
+                        //let hexagonGroup = this.hexagonGroup = g.append("g")
+                        //    .attr("class", "hexagons")
+                        //    .attr("clip-path", "url(#clip)");
+                        //let dotGroup = this.dotGroup = g.append("g")
+                        //    .attr("class", "dots");
                     }
                     Visual.prototype.update = function (options) {
                         this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
@@ -14556,6 +14556,8 @@ var powerbi;
                             .attr("width", options.viewport.width)
                             .attr("height", options.viewport.height);
                         try {
+                            svg.select(".hexagons").remove();
+                            svg.select(".dots").remove();
                             svg.select(".hexbinLabels").remove();
                             svg.selectAll(".axis").remove();
                             svg.select(".x-axis-label").remove();
@@ -14566,7 +14568,10 @@ var powerbi;
                                 .attr("width", width > 0 ? width : 0)
                                 .attr("height", height > 0 ? height : 0)
                                 .attr("transform", "translate(" + margin.left + ",0)");
-                            var hexagonGroup = this.hexagonGroup;
+                            //let hexagonGroup = this.hexagonGroup;
+                            var hexagonGroup = g.append("g")
+                                .attr("class", "hexagons")
+                                .attr("clip-path", "url(#clip)");
                             if (!optionShowBins) {
                                 hexagonGroup.attr("visibility", "hidden");
                             }
@@ -14605,7 +14610,9 @@ var powerbi;
                                     .style("text-anchor", "middle")
                                     .text(viewModel.scatterMetaData[0].yAxisLabel);
                             }
-                            var dotGroup = this.dotGroup;
+                            //let dotGroup = this.dotGroup;
+                            var dotGroup = g.append("g")
+                                .attr("class", "dots");
                             if (!optionShowDots) {
                                 dotGroup.attr("visibility", "hidden");
                             }

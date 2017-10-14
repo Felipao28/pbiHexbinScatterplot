@@ -235,12 +235,12 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                 .append("rect")
                     .attr("class", "clip-rect");
 
-            let hexagonGroup = this.hexagonGroup = g.append("g")
-                .attr("class", "hexagons")
-                .attr("clip-path", "url(#clip)");
+            //let hexagonGroup = this.hexagonGroup = g.append("g")
+            //    .attr("class", "hexagons")
+            //    .attr("clip-path", "url(#clip)");
 
-            let dotGroup = this.dotGroup = g.append("g")
-                .attr("class", "dots");
+            //let dotGroup = this.dotGroup = g.append("g")
+            //    .attr("class", "dots");
 
         }
 
@@ -336,6 +336,9 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                 .attr("height", options.viewport.height);
 
             try{
+                svg.select(".hexagons").remove();
+                svg.select(".dots").remove();
+                
                 svg.select(".hexbinLabels").remove();
                 svg.selectAll(".axis").remove();
                 svg.select(".x-axis-label").remove();
@@ -349,7 +352,10 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                     .attr("height", height > 0 ? height : 0)
                     .attr("transform", "translate(" + margin.left + ",0)");
 
-                let hexagonGroup = this.hexagonGroup;
+                //let hexagonGroup = this.hexagonGroup;
+                let hexagonGroup = g.append("g")
+                    .attr("class", "hexagons")
+                    .attr("clip-path", "url(#clip)");
                 if(!optionShowBins){
                     hexagonGroup.attr("visibility", "hidden");
                 }
@@ -394,7 +400,9 @@ module powerbi.extensibility.visual.hexbinScatter70A7F14565444FAA99F786FAD6EA5AE
                         .text(viewModel.scatterMetaData[0].yAxisLabel);
                 }
                 
-                let dotGroup = this.dotGroup;
+                //let dotGroup = this.dotGroup;
+                let dotGroup = g.append("g")
+                    .attr("class", "dots");
                 if(!optionShowDots){
                     dotGroup.attr("visibility", "hidden");
                 }
