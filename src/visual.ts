@@ -283,6 +283,8 @@ module powerbi.extensibility.visual {
             };
             let height = options.viewport.height - margin.top - margin.bottom;
             let width = options.viewport.width - margin.left - margin.right;
+			
+			let binScale = width / (parseInt(optionBinRadius));
 
             let data = viewModel.scatterDataPoints;
             let xRange = d3.extent(data, function(d){ return d.xValue; });
@@ -324,7 +326,7 @@ module powerbi.extensibility.visual {
 
             let hexbin = d3.hexbin()
                 .size([width, height])
-                .radius(optionBinRadius)
+                .radius(binScale)
                 .extent([[0, 0], [width, height]]);
 
             // console.log(hexbin(points));

@@ -39,11 +39,11 @@
                     "displayName": "Bin radius",
                     "type": {
                         "enumeration": [
-                            {"value": "10", "displayName": "10"},
-                            {"value": "20", "displayName": "20"},
+                            {"value": "10", "displayName": "50"},
+                            {"value": "20", "displayName": "40"},
                             {"value": "30", "displayName": "30"},
-                            {"value": "40", "displayName": "40"},
-                            {"value": "50", "displayName": "50"}
+                            {"value": "40", "displayName": "20"},
+                            {"value": "50", "displayName": "10"}
                         ]
                     }
                 },
